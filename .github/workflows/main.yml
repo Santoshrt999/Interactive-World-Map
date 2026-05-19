@@ -1,0 +1,45 @@
+name: Add LICENSE to All Repos
+
+on:
+  workflow_dispatch:
+
+jobs:
+  add-license:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Git
+        run: |
+          git config --global user.name "Santoshrt999"
+          git config --global user.email "gsr.teja@gmail.com"
+      
+      - name: Add LICENSE to all repositories
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Get all repos
+          repos=$(gh repo list ${{ github.repository_owner }} --limit 1000 --json nameWithOwner -q '.[].nameWithOwner')
+          
+          for repo in $repos; do
+            echo "Processing $repo..."
+            
+            # Clone the repo
+            gh repo clone $repo temp-repo
+            cd temp-repo
+            
+            # Copy LICENSE from Interactive-World-Map if it doesn't exist
+            if [ ! -f LICENSE ]; then
+              curl -s https://raw.githubusercontent.com/Santoshrt999/Interactive-World-Map/main/LICENSE -o LICENSE
+              
+              git add LICENSE
+              git commit -m "Add MIT LICENSE"
+              git push
+              echo "✓ Added LICENSE to $repo"
+            else
+              echo "✗ LICENSE already exists in $repo"
+            fi
+            
+            cd ..
+            rm -rf temp-repo
+          done
