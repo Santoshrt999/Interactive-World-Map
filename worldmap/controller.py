@@ -20,6 +20,7 @@ class MapController:
         self.window.mode_toggle.clicked.connect(self.on_mode_toggle)
         self.map_canvas.viewChanged.connect(self.on_view_changed)
         self.map_canvas.inspectRequested.connect(self.on_inspect_requested)
+        self.map_canvas.hoverRequested.connect(self.on_hover_requested)
         self.map_canvas.installEventFilter(self)
 
     def on_search_text(self, text: str) -> None:
@@ -35,6 +36,7 @@ class MapController:
         if not entry:
             return
         self.model.update_center(entry["lon"], entry["lat"])
+        self.model.set_selected_feature(self.model.inspect_location(entry["lon"], entry["lat"]))
         self.window.refresh_metrics()
         self.map_canvas.update()
 
@@ -42,6 +44,12 @@ class MapController:
         self.model.set_overlay(mode)
         for key, button in self.window.overlay_buttons.items():
             button.setChecked(key == mode)
+        self.window.refresh_metrics()
+        self.map_canvas.update()
+
+    def on_hover_requested(self, lon: float, lat: float) -> None:
+        hovered = self.model.inspect_location(lon, lat)
+        self.model.set_hovered_feature(hovered)
         self.window.refresh_metrics()
         self.map_canvas.update()
 
@@ -55,12 +63,6 @@ class MapController:
 
     def on_inspect_requested(self, lon: float, lat: float) -> None:
         feature = self.model.inspect_location(lon, lat)
-        if feature:
-            self.window.metrics_label.setText(
-                f"{feature['properties']['name']}\n"
-                f"Population: {feature['properties']['population']}M\n"
-                f"Climate: {feature['properties']['climate']}°C\n"
-                f"GDP: ${feature['properties']['gdp']}B"
-            )
-        else:
-            self.window.metrics_label.setText("No region found at this location.")
+        self.model.set_selected_feature(feature)
+        self.window.refresh_metrics()
+        self.map_canvas.update()

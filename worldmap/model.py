@@ -4,7 +4,7 @@ import threading
 import urllib.request
 import urllib.error
 from collections import deque
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Union
 
 try:
     import requests
@@ -19,6 +19,28 @@ from .data.places import SEARCH_INDEX
 TILE_SERVER = "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
 CACHE_DIR = os.path.join(os.path.expanduser("~"), ".interactive_world_map", "tiles")
 TILE_SIZE = 256
+
+OVERLAY_CONFIG = {
+    "population": {
+        "label": "Population (M)",
+        "max": 1500.0,
+        "low": (0.22, 0.55, 0.96),
+        "high": (0.96, 0.22, 0.18),
+    },
+    "climate": {
+        "label": "Avg Temp (°C)",
+        "min": -10.0,
+        "max": 35.0,
+        "low": (0.16, 0.72, 0.95),
+        "high": (0.98, 0.72, 0.20),
+    },
+    "gdp": {
+        "label": "GDP (B USD)",
+        "max": 22000.0,
+        "low": (0.26, 0.44, 0.82),
+        "high": (0.44, 0.88, 0.56),
+    },
+}
 
 
 def clamp(value: float, minimum: float, maximum: float) -> float:
@@ -82,6 +104,8 @@ class MapModel:
         self.features = SAMPLE_FEATURES
         self.spatial_index = SpatialIndex(self.features)
         self.search_index = SEARCH_INDEX
+        self.selected_feature: Optional[Dict] = None
+        self.hovered_feature: Optional[Dict] = None
         self.notifications: deque[str] = deque(maxlen=5)
 
     @staticmethod
@@ -115,12 +139,18 @@ class MapModel:
                 with open(path, "wb") as handle:
                     handle.write(tile_bytes)
                 image = QImage.fromData(tile_bytes)
+                if image.isNull():
+                    raise ValueError("Downloaded tile could not be decoded")
             except Exception:
                 self.offline = True
                 image = self._make_placeholder_tile()
-                self.notifications.append("Offline or tile server unavailable. Using cached / placeholder tiles.")
+                self.notifications.append("Offline or tile server unavailable. Using cached or placeholder tiles.")
             else:
                 self.offline = False
+
+        with self._tile_lock:
+            self._tile_cache[key] = image
+        return image
 
     def _download_tile(self, url: str) -> bytes:
         if requests is not None:
@@ -130,12 +160,76 @@ class MapModel:
         with urllib.request.urlopen(url, timeout=5) as response:
             return response.read()
 
-        if image is None or image.isNull():
-            image = self._make_placeholder_tile()
+    def _feature_rings(self, feature: Dict) -> List[List[List[float]]]:
+        geometry = feature.get("geometry", {})
+        if geometry.get("type") == "Polygon":
+            return geometry.get("coordinates", [])
+        if geometry.get("type") == "MultiPolygon":
+            return [ring for polygon in geometry.get("coordinates", []) for ring in polygon]
+        return []
 
-        with self._tile_lock:
-            self._tile_cache[key] = image
-        return image
+    def _point_in_ring(self, lon: float, lat: float, ring: List[List[float]]) -> bool:
+        inside = False
+        n = len(ring)
+        for i in range(n):
+            x1, y1 = ring[i]
+            x2, y2 = ring[(i + 1) % n]
+            if ((y1 > lat) != (y2 > lat)) and (lon < (x2 - x1) * (lat - y1) / (y2 - y1 + 1e-12) + x1):
+                inside = not inside
+        return inside
+
+    def feature_contains_point(self, feature: Dict, lon: float, lat: float) -> bool:
+        for ring in self._feature_rings(feature):
+            if self._point_in_ring(lon, lat, ring):
+                return True
+        return False
+
+    def inspect_location(self, lon: float, lat: float) -> Optional[Dict]:
+        candidates = self.spatial_index.query(lon, lat)
+        for feature in candidates:
+            if self.feature_contains_point(feature, lon, lat):
+                return feature
+        return None
+
+    def set_selected_feature(self, feature: Optional[Dict]) -> None:
+        self.selected_feature = feature
+
+    def set_hovered_feature(self, feature: Optional[Dict]) -> None:
+        self.hovered_feature = feature
+
+    def total_population(self) -> float:
+        return sum(feature["properties"].get("population", 0) for feature in self.features)
+
+    def average_climate(self) -> float:
+        values = [feature["properties"].get("climate", 0.0) for feature in self.features]
+        return sum(values) / max(len(values), 1)
+
+    def total_gdp(self) -> float:
+        return sum(feature["properties"].get("gdp", 0.0) for feature in self.features)
+
+    def get_overlay_label(self) -> str:
+        return OVERLAY_CONFIG.get(self.overlay_mode, {}).get("label", self.overlay_mode.title())
+
+    def get_overlay_color(self, feature: Dict) -> Tuple[float, float, float, float]:
+        value = feature["properties"].get(self.overlay_mode, 0.0)
+        config = OVERLAY_CONFIG.get(self.overlay_mode, {})
+        low = config.get("low", (0.7, 0.7, 0.7))
+        high = config.get("high", (0.9, 0.9, 0.9))
+        if self.overlay_mode == "population":
+            normalized = min(value / config.get("max", 1500.0), 1.0)
+        elif self.overlay_mode == "climate":
+            normalized = min(max((value - config.get("min", -10.0)) / (config.get("max", 35.0) - config.get("min", -10.0)), 0.0), 1.0)
+        elif self.overlay_mode == "gdp":
+            normalized = min(value / config.get("max", 22000.0), 1.0)
+        else:
+            normalized = 0.0
+        color = (
+            low[0] + (high[0] - low[0]) * normalized,
+            low[1] + (high[1] - low[1]) * normalized,
+            low[2] + (high[2] - low[2]) * normalized,
+            self.opacity,
+        )
+        return color
 
     @staticmethod
     def _make_placeholder_tile() -> QImage:
@@ -163,25 +257,8 @@ class MapModel:
     def update_zoom(self, delta: int) -> None:
         self.zoom = clamp(self.zoom + delta, 1, 5)
 
-    def inspect_location(self, lon: float, lat: float) -> Optional[Dict]:
-        matches = self.spatial_index.query(lon, lat)
-        return matches[0] if matches else None
-
     def get_overlay_value(self, feature: Dict) -> float:
         return feature["properties"].get(self.overlay_mode, 0.0)
-
-    def get_overlay_color(self, feature: Dict) -> Tuple[float, float, float, float]:
-        value = self.get_overlay_value(feature)
-        if self.overlay_mode == "population":
-            normalized = min(value / 1500.0, 1.0)
-            return (0.95, 0.35 * normalized + 0.15, 0.12, self.opacity)
-        if self.overlay_mode == "climate":
-            normalized = min(max((value - 10.0) / 30.0, 0.0), 1.0)
-            return (0.16, 0.65, 0.95 - normalized * 0.35, self.opacity)
-        if self.overlay_mode == "gdp":
-            normalized = min(value / 20000.0, 1.0)
-            return (0.12 + normalized * 0.65, 0.33, 0.84, self.opacity)
-        return (0.76, 0.80, 0.92, self.opacity)
 
     def get_notification(self) -> Optional[str]:
         return self.notifications[-1] if self.notifications else None

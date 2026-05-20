@@ -13,6 +13,7 @@ class WorldAtlasApp:
         self.model = MapModel()
         self.window = MainWindow(self.model)
         self.controller = MapController(self.model, self.window)
+        self.window.refresh_metrics()
 
     def run(self):
         self.window.show()

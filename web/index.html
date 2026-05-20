@@ -3,163 +3,246 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Interactive World Atlas</title>
+  <title>Geospatial Analytics Dashboard</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
   <style>
-    body, html { margin:0; padding:0; height:100%; background:#050814; color:#e7edf8; font-family:Inter, system-ui, sans-serif; }
-    #map { position:absolute; inset:0; }
-    .panel { position:absolute; top:16px; left:16px; width:320px; max-width:calc(100% - 32px); backdrop-filter: blur(22px); background: rgba(12,16,30,0.72); border:1px solid rgba(255,255,255,0.08); border-radius:22px; padding:20px; box-shadow:0 24px 80px rgba(0,0,0,0.35); z-index:1000; }
-    .panel h1 { margin:0 0 12px; font-size:22px; letter-spacing:0.02em; color:#f8fbff; }
-    .panel p { margin:0 0 14px; color:#a8b4d1; line-height:1.5; }
-    .search-group { display:flex; gap:10px; align-items:center; }
-    .search-group input { flex:1; border:none; outline:none; border-radius:14px; padding:12px 14px; background:rgba(255,255,255,0.08); color:#f8fbff; }
-    .search-group button { border:none; border-radius:14px; padding:12px 18px; background:#6b5cff; color:#fff; cursor:pointer; }
-    .suggestions { margin:12px 0 16px; max-height:180px; overflow:auto; border-radius:14px; border:1px solid rgba(255,255,255,0.08); background:rgba(8,12,24,0.96); }
-    .suggestion { padding:12px 14px; cursor:pointer; border-bottom:1px solid rgba(255,255,255,0.06); }
-    .suggestion:last-child { border-bottom:none; }
-    .suggestion:hover { background:rgba(255,255,255,0.06); }
-    .controls { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:16px; }
-    .control-button { border:none; border-radius:14px; padding:10px 14px; background:rgba(255,255,255,0.08); color:#f8fbff; cursor:pointer; transition:transform .18s ease, background .18s ease; }
-    .control-button.active, .control-button:hover { background:#625cff; transform:translateY(-1px); }
-    .stat-card { display:grid; gap:10px; margin-top:6px; padding:16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.08); border-radius:20px; }
-    .stat-card span { font-size:13px; color:#94a3b8; }
-    .stat-card strong { display:block; font-size:18px; margin-top:4px; color:#eef2ff; }
-    .legend { display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-top:14px; }
-    .legend-item { display:flex; align-items:center; gap:8px; font-size:13px; }
-    .legend-swatch { width:20px; height:20px; border-radius:6px; box-shadow:0 0 0 1px rgba(255,255,255,0.08); }
-    .leaflet-control-attribution, .leaflet-control-scale { color:#ccd6f6; }
-    a { color:#9ca5ff; }
+    :root {
+      color-scheme: dark;
+      --bg: #050914;
+      --panel: rgba(10, 16, 30, 0.88);
+      --panel-border: rgba(255, 255, 255, 0.08);
+      --text: #edf4ff;
+      --muted: #9bb2d6;
+      --accent: #7e6bff;
+      --accent-soft: rgba(126, 107, 255, 0.14);
+      --success: #4fe2c8;
+      --warning: #ffb65b;
+      --danger: #ff5d77;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; width: 100%; height: 100%; font-family: Inter, system-ui, sans-serif; background: radial-gradient(circle at top, #080c1d 0%, #03050d 45%, #02030b 100%); color: var(--text); }
+    body { overflow: hidden; }
+    #map { position: absolute; inset: 0; z-index: 1; }
+    .dashboard { position: absolute; top: 16px; left: 16px; width: min(420px, calc(100% - 32px)); max-height: calc(100% - 32px); display: grid; gap: 16px; z-index: 1000; }
+    .panel { backdrop-filter: blur(30px); background: var(--panel); border: 1px solid var(--panel-border); border-radius: 28px; padding: 24px; box-shadow: 0 28px 80px rgba(0,0,0,0.28); overflow: hidden; }
+    .panel h1 { margin: 0 0 8px; font-size: 24px; letter-spacing: 0.02em; }
+    .panel p { margin: 0 0 18px; line-height: 1.7; color: var(--muted); }
+    .toolbar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 18px; }
+    .toolbar button { border: none; border-radius: 16px; padding: 14px 16px; background: rgba(255,255,255,0.08); color: var(--text); cursor: pointer; transition: transform .18s ease, background .18s ease; font-weight: 600; }
+    .toolbar button.active, .toolbar button:hover { background: linear-gradient(135deg, rgba(126,107,255,0.92), rgba(61,179,255,0.92)); transform: translateY(-1px); }
+    .search-group { display: grid; gap: 10px; margin-bottom: 16px; }
+    .search-group input { width: 100%; border: none; border-radius: 16px; padding: 14px 16px; background: rgba(255,255,255,0.08); color: var(--text); }
+    .search-group button { border: none; border-radius: 16px; padding: 14px 18px; background: var(--accent); color: #fff; cursor: pointer; font-weight: 700; }
+    .suggestions { max-height: 190px; overflow: auto; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(8,12,24,0.96); margin-bottom: 16px; }
+    .suggestion { padding: 14px 16px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .suggestion:last-child { border-bottom: none; }
+    .suggestion:hover { background: rgba(126,107,255,0.14); }
+    .stats-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .metric-card { border-radius: 22px; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06); }
+    .metric-card h3 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
+    .metric-card p { margin: 0; font-size: 22px; font-weight: 800; }
+    .info-panel { margin-top: 18px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.05); padding: 18px; }
+    .info-panel strong { display: block; margin-bottom: 10px; font-size: 14px; color: #fff; }
+    .info-panel div { margin-bottom: 8px; color: var(--muted); }
+    .legend { display: grid; gap: 10px; margin-top: 16px; }
+    .legend-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
+    .legend-swatch { width: 22px; height: 22px; border-radius: 10px; box-shadow: 0 0 0 1px rgba(255,255,255,0.08); }
+    .toplist { margin-top: 18px; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06); border-radius: 22px; }
+    .toplist h2 { margin: 0 0 12px; font-size: 14px; color: var(--muted); }
+    .top-item { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); }
+    .top-item:last-child { border-bottom: none; }
+    .top-item strong { color: #fff; }
+    .status-chip { display: inline-flex; align-items: center; gap: 8px; padding: 10px 14px; border-radius: 16px; background: rgba(126,107,255,0.18); color: #e9f2ff; font-size: 13px; }
+    .leaflet-container { font: 14px/1.4 Inter, system-ui, sans-serif; }
+    .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: rgba(8,12,24,0.96); color: #eef2ff; border:1px solid rgba(255,255,255,0.10); }
+    .leaflet-popup-content p { margin:0; }
+    .leaflet-tooltip { background: rgba(17, 24, 39, 0.96); color: #edf4ff; border:none; box-shadow: 0 12px 34px rgba(0,0,0,0.22); }
   </style>
 </head>
 <body>
   <div id="map"></div>
-  <div class="panel">
-    <h1>Interactive World Atlas</h1>
-    <p>Use the search box for cities and countries, then toggle map overlays for population, climate and GDP.</p>
-    <div class="search-group">
-      <input id="search" placeholder="Search cities or countries..." autocomplete="off" />
-      <button id="zoomHome">Home</button>
-    </div>
-    <div id="suggestions" class="suggestions"></div>
-    <div class="controls">
-      <button class="control-button active" data-mode="population">Population</button>
-      <button class="control-button" data-mode="climate">Climate</button>
-      <button class="control-button" data-mode="gdp">GDP</button>
-    </div>
-    <div class="stat-card">
-      <span>Selected overlay</span>
-      <strong id="currentMode">Population</strong>
-      <div id="statLines" style="font-size:13px;color:#94a3b8;line-height:1.65;">
-        <div>Population: 331M</div>
-        <div>Climate: 12.5°C</div>
-        <div>GDP: $21433B</div>
+  <div class="dashboard">
+    <section class="panel">
+      <div style="display:flex; justify-content:space-between; gap:16px; align-items:flex-start;">
+        <div>
+          <h1>Geospatial Analytics Dashboard</h1>
+          <p>Interactive map analytics with legend-driven overlays, regional KPIs, and search-first navigation.</p>
+        </div>
+        <span class="status-chip" id="statusTag">Population overlay</span>
+      </div>
+      <div class="search-group">
+        <input id="search" placeholder="Search city or country..." autocomplete="off" />
+        <button id="zoomHome">Reset</button>
+      </div>
+      <div id="suggestions" class="suggestions"></div>
+      <div class="toolbar">
+        <button class="control-button active" data-mode="population">Population</button>
+        <button class="control-button" data-mode="climate">Climate</button>
+        <button class="control-button" data-mode="gdp">GDP</button>
+      </div>
+      <div class="stats-grid">
+        <div class="metric-card"><h3>Current overlay</h3><p id="currentMode">Population</p></div>
+        <div class="metric-card"><h3>Regions</h3><p id="regionCount">5</p></div>
+        <div class="metric-card"><h3>Average</h3><p id="averageValue">—</p></div>
+        <div class="metric-card"><h3>Selected</h3><p id="selectedValue">None</p></div>
+      </div>
+      <div class="info-panel">
+        <strong id="infoTitle">Click a region to see details</strong>
+        <div id="infoPopulation">Population: —</div>
+        <div id="infoClimate">Avg temp: —</div>
+        <div id="infoGdp">GDP: —</div>
       </div>
       <div class="legend" id="legend"></div>
-    </div>
+    </section>
+    <section class="panel toplist">
+      <h2>Top 3 regions</h2>
+      <div id="topList"></div>
+    </section>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
     const places = [
-      {label:'Tokyo, Japan', lat:35.6895, lon:139.6917},
-      {label:'New York, USA', lat:40.7128, lon:-74.0060},
-      {label:'London, UK', lat:51.5074, lon:-0.1278},
-      {label:'Paris, France', lat:48.8566, lon:2.3522},
-      {label:'Sydney, Australia', lat:-33.8688, lon:151.2093},
-      {label:'São Paulo, Brazil', lat:-23.5505, lon:-46.6333},
-      {label:'Mumbai, India', lat:19.0760, lon:72.8777},
-      {label:'Cairo, Egypt', lat:30.0444, lon:31.2357},
-      {label:'Moscow, Russia', lat:55.7558, lon:37.6173},
-      {label:'Toronto, Canada', lat:43.6532, lon:-79.3832},
-      {label:'Berlin, Germany', lat:52.5200, lon:13.4050},
-      {label:'Nairobi, Kenya', lat:-1.2921, lon:36.8219},
-      {label:'Singapore', lat:1.3521, lon:103.8198},
-      {label:'Cape Town, South Africa', lat:-33.9249, lon:18.4241},
-      {label:'Los Angeles, USA', lat:34.0522, lon:-118.2437},
-      {label:'Mexico City, Mexico', lat:19.4326, lon:-99.1332},
-      {label:'Buenos Aires, Argentina', lat:-34.6037, lon:-58.3816},
-      {label:'Jakarta, Indonesia', lat:-6.2088, lon:106.8456},
-      {label:'Shanghai, China', lat:31.2304, lon:121.4737},
-      {label:'United States', lat:38.9072, lon:-77.0369},
-      {label:'Brazil', lat:-14.2350, lon:-51.9253},
-      {label:'India', lat:20.5937, lon:78.9629},
-      {label:'Australia', lat:-25.2744, lon:133.7751},
-      {label:'South Africa', lat:-30.5595, lon:22.9375}
+      { label: 'Tokyo, Japan', lat: 35.6895, lon: 139.6917, region: 'Asia' },
+      { label: 'New York, USA', lat: 40.7128, lon: -74.0060, region: 'North America' },
+      { label: 'London, UK', lat: 51.5074, lon: -0.1278, region: 'Europe' },
+      { label: 'Paris, France', lat: 48.8566, lon: 2.3522, region: 'Europe' },
+      { label: 'Sydney, Australia', lat: -33.8688, lon: 151.2093, region: 'Oceania' },
+      { label: 'São Paulo, Brazil', lat: -23.5505, lon: -46.6333, region: 'South America' },
+      { label: 'Mumbai, India', lat: 19.0760, lon: 72.8777, region: 'Asia' },
+      { label: 'Cairo, Egypt', lat: 30.0444, lon: 31.2357, region: 'Africa' },
+      { label: 'Moscow, Russia', lat: 55.7558, lon: 37.6173, region: 'Europe' },
+      { label: 'Toronto, Canada', lat: 43.6532, lon: -79.3832, region: 'North America' },
+      { label: 'Berlin, Germany', lat: 52.5200, lon: 13.4050, region: 'Europe' },
+      { label: 'Nairobi, Kenya', lat: -1.2921, lon: 36.8219, region: 'Africa' },
+      { label: 'Singapore', lat: 1.3521, lon: 103.8198, region: 'Asia' },
+      { label: 'Cape Town, South Africa', lat: -33.9249, lon: 18.4241, region: 'Africa' },
+      { label: 'Los Angeles, USA', lat: 34.0522, lon: -118.2437, region: 'North America' },
+      { label: 'Mexico City, Mexico', lat: 19.4326, lon: -99.1332, region: 'North America' },
+      { label: 'Buenos Aires, Argentina', lat: -34.6037, lon: -58.3816, region: 'South America' },
+      { label: 'Jakarta, Indonesia', lat: -6.2088, lon: 106.8456, region: 'Asia' },
+      { label: 'Shanghai, China', lat: 31.2304, lon: 121.4737, region: 'Asia' }
     ];
 
-    const geoData = {
-      type:'FeatureCollection',
-      features:[
-        {type:'Feature', properties:{name:'United States', population:331, climate:12.5, gdp:21433}, geometry:{type:'Polygon', coordinates:[[[ -125,24 ],[-66,24],[-66,49],[-125,49],[-125,24]]] }},
-        {type:'Feature', properties:{name:'Brazil', population:213, climate:24.8, gdp:1839}, geometry:{type:'Polygon', coordinates:[[[ -74,-34],[-34,-34],[-34,5],[-74,5],[-74,-34]]] }},
-        {type:'Feature', properties:{name:'India', population:1380, climate:25.2, gdp:2875}, geometry:{type:'Polygon', coordinates:[[[ 68,6],[97,6],[97,35],[68,35],[68,6]]] }},
-        {type:'Feature', properties:{name:'China', population:1441, climate:14.5, gdp:14343}, geometry:{type:'Polygon', coordinates:[[[ 73,18],[135,18],[135,53],[73,53],[73,18]]] }},
-        {type:'Feature', properties:{name:'Australia', population:26, climate:21.0, gdp:1393}, geometry:{type:'Polygon', coordinates:[[[ 113,-44],[154,-44],[154,-10],[113,-10],[113,-44]]] }}
-      ]
+    let geoData = null;
+    let overlayLayer = null;
+    let searchIndex = [...places];
+    const map = L.map('map', { zoomControl: true, minZoom: 2, maxZoom: 18, zoomSnap: 0.5 }).setView([20, 0], 2);
+    const baseLayers = {
+      'Modern Streets': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap contributors', maxZoom: 19 }),
+      'Night Mode': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', { attribution: '&copy; CARTO', maxZoom: 19 })
     };
-
-    const map = L.map('map', { zoomControl:true, minZoom:2 }).setView([20, 0], 2);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution:'&copy; OpenStreetMap contributors', maxZoom:19
-    }).addTo(map);
+    baseLayers['Modern Streets'].addTo(map);
+    L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
 
     let overlayMode = 'population';
-    const overlayLayer = L.geoJSON(geoData, { style: styleFeature, onEachFeature }).addTo(map);
+    let selectedLayer = null;
 
     function styleFeature(feature) {
       return {
         fillColor: getOverlayColor(feature.properties),
-        color: '#1f2430',
-        weight: 1.5,
-        fillOpacity: 0.78,
-        dashArray: '3',
+        color: 'rgba(255,255,255,0.18)',
+        weight: 0.7,
+        fillOpacity: 0.55,
       };
     }
 
+    function lerp(a, b, t) { return a + (b - a) * t; }
+    function lerpColor(c1, c2, t) {
+      return `rgb(${Math.round(lerp(c1[0], c2[0], t))},${Math.round(lerp(c1[1], c2[1], t))},${Math.round(lerp(c1[2], c2[2], t))})`;
+    }
+
     function getOverlayColor(properties) {
+      const value = properties[overlayMode] || 0;
       if (overlayMode === 'population') {
-        const value = properties.population;
-        return value > 1000 ? '#ff4655' : value > 300 ? '#ff8b3d' : '#ffd43b';
+        // light blue → deep blue (no red/orange)
+        const t = Math.min(value / 1450, 1);
+        return lerpColor([210, 235, 255], [20, 80, 180], t);
       }
       if (overlayMode === 'climate') {
-        const value = properties.climate;
-        return value > 22 ? '#ff61a6' : value > 15 ? '#6f8bff' : '#33d6ff';
+        // cool teal → warm amber (intuitive cool-to-hot)
+        const t = Math.min(Math.max((value + 5) / 37, 0), 1);
+        return lerpColor([100, 210, 200], [240, 160, 40], t);
       }
       if (overlayMode === 'gdp') {
-        const value = properties.gdp;
-        return value > 10000 ? '#6c5ce7' : value > 2000 ? '#4cd137' : '#1abc9c';
+        // pale green → deep green (no purple)
+        const t = Math.min(value / 25000, 1);
+        return lerpColor([210, 245, 220], [20, 130, 70], t);
       }
-      return '#7f8c8d';
+      return '#b0bec5';
+    }
+
+    function highlightFeature(layer) {
+      layer.setStyle({ weight: 2.7, color: '#ffffff', fillOpacity: 0.92 });
+      if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+        layer.bringToFront();
+      }
+    }
+
+    function resetHighlight(layer) {
+      if (selectedLayer === layer) {
+        layer.setStyle({ weight: 2.7, color: '#ffffff', fillOpacity: 0.92 });
+      } else if (overlayLayer) {
+        overlayLayer.resetStyle(layer);
+      }
+    }
+
+    function selectFeature(feature, layer) {
+      if (selectedLayer) {
+        overlayLayer.resetStyle(selectedLayer);
+      }
+      selectedLayer = layer;
+      layer.setStyle({ weight: 2.7, color: '#ffffff', fillOpacity: 0.92 });
+      updateDashboard(feature.properties.name, feature.properties);
+      layer.openPopup();
     }
 
     function onEachFeature(feature, layer) {
       layer.on({
-        click: () => {
-          const p = feature.properties;
-          updateStatCard(`${p.name} — ${overlayMode.charAt(0).toUpperCase()+overlayMode.slice(1)}`,
-            `Population: ${p.population}M`, `Climate: ${p.climate}°C`, `GDP: $${p.gdp}B`);
-        }
+        mouseover: () => highlightFeature(layer),
+        mouseout: () => resetHighlight(layer),
+        click: () => selectFeature(feature, layer)
       });
+      layer.bindPopup(`<strong>${feature.properties.name}</strong><br>${formatOverlayValue(feature.properties)}`);
+      layer.bindTooltip(feature.properties.name, { direction: 'center', permanent: false, className: 'tooltip-label' });
+    }
+
+    function formatOverlayValue(properties) {
+      if (overlayMode === 'population') return `Population ${properties.population}M`;
+      if (overlayMode === 'climate') return `Avg temp ${properties.climate}°C`;
+      if (overlayMode === 'gdp') return `GDP $${properties.gdp}B`;
+      return '';
+    }
+
+    function updateDashboard(name, properties) {
+      document.getElementById('currentMode').textContent = `${name} — ${capitalize(overlayMode)}`;
+      document.getElementById('selectedValue').textContent = formatOverlayValue(properties);
+      document.getElementById('infoTitle').textContent = name;
+      document.getElementById('infoPopulation').textContent = `Population: ${properties.population} M`;
+      document.getElementById('infoClimate').textContent = `Avg temp: ${properties.climate} °C`;
+      document.getElementById('infoGdp').textContent = `GDP: $${properties.gdp} B`;
+      updateLegend();
+      updateTopMetrics();
     }
 
     function updateOverlay() {
+      if (!overlayLayer) return;
       overlayLayer.setStyle(styleFeature);
-      updateCurrentMode();
+      document.getElementById('statusTag').textContent = `${capitalize(overlayMode)} overlay`;
+      document.getElementById('currentMode').textContent = capitalize(overlayMode);
+      if (selectedLayer) selectFeature(selectedLayer.feature, selectedLayer);
       updateLegend();
-    }
-
-    function updateCurrentMode() {
-      document.getElementById('currentMode').textContent = overlayMode.charAt(0).toUpperCase() + overlayMode.slice(1);
+      updateTopMetrics();
     }
 
     function updateLegend() {
       const legend = document.getElementById('legend');
       legend.innerHTML = '';
       const stops = overlayMode === 'population'
-        ? [{color:'#ff4655', label:'>1000M'},{color:'#ff8b3d', label:'300-1000M'},{color:'#ffd43b', label:'<300M'}]
+        ? [{ color: 'rgb(20,80,180)',  label: '1B+ people' }, { color: 'rgb(110,155,215)', label: '~300M people' }, { color: 'rgb(210,235,255)', label: '<50M people' }]
         : overlayMode === 'climate'
-          ? [{color:'#ff61a6', label:'Hot (>22°C)'},{color:'#6f8bff', label:'Warm (15-22°C)'},{color:'#33d6ff', label:'Cool (<15°C)'}]
-          : [{color:'#6c5ce7', label:'High GDP'},{color:'#4cd137', label:'Medium GDP'},{color:'#1abc9c', label:'Low GDP'}];
+          ? [{ color: 'rgb(240,160,40)', label: 'Hot (>25°C)' }, { color: 'rgb(170,185,120)', label: 'Warm (~15°C)' }, { color: 'rgb(100,210,200)', label: 'Cool (<5°C)' }]
+          : [{ color: 'rgb(20,130,70)',  label: '>$10T GDP' }, { color: 'rgb(115,188,145)', label: '~$1T GDP' }, { color: 'rgb(210,245,220)', label: '<$100B GDP' }];
       stops.forEach(item => {
         const badge = document.createElement('div');
         badge.className = 'legend-item';
@@ -168,10 +251,244 @@
       });
     }
 
-    function updateStatCard(title, line1, line2, line3) {
-      document.getElementById('currentMode').textContent = title;
-      document.getElementById('statLines').innerHTML = `<div>${line1}</div><div>${line2}</div><div>${line3}</div>`;
-      updateLegend();
+    function updateTopMetrics() {
+      if (!geoData) return;
+      const sorted = geoData.features.slice().sort((a, b) => b.properties[overlayMode] - a.properties[overlayMode]);
+      document.getElementById('regionCount').textContent = sorted.length;
+      document.getElementById('averageValue').textContent = `${Math.round(sorted.reduce((sum, feature) => sum + feature.properties[overlayMode], 0) / sorted.length)}${overlayMode === 'gdp' ? 'B' : overlayMode === 'population' ? 'M' : '°C'}`;
+      document.getElementById('topList').innerHTML = sorted.slice(0, 3).map(feature => `
+        <div class='top-item'>
+          <div>${feature.properties.name}</div>
+          <strong>${feature.properties[overlayMode]}${overlayMode === 'gdp' ? 'B' : overlayMode === 'population' ? 'M' : '°C'}</strong>
+        </div>
+      `).join('');
+    }
+
+    function createCityMarkers() {
+      return places.map(city => L.circleMarker([city.lat, city.lon], {
+        radius: 6,
+        fillColor: '#ffe64d',
+        color: '#ffffff',
+        weight: 1,
+        fillOpacity: 0.88,
+      }).bindTooltip(`<strong>${city.label}</strong>`, { direction: 'top' }));
+    }
+
+    function capitalize(value) {
+      return value.charAt(0).toUpperCase() + value.slice(1);
+    }
+
+    function hashString(value) {
+      let hash = 0;
+      for (let i = 0; i < value.length; i += 1) {
+        hash = ((hash << 5) - hash) + value.charCodeAt(i);
+        hash |= 0;
+      }
+      return Math.abs(hash);
+    }
+
+    function getFeatureCentroid(feature) {
+      let latSum = 0;
+      let lonSum = 0;
+      let count = 0;
+      function accumulate(coords) {
+        if (typeof coords[0] === 'number') {
+          lonSum += coords[0];
+          latSum += coords[1];
+          count += 1;
+        } else {
+          coords.forEach(accumulate);
+        }
+      }
+      accumulate(feature.geometry.coordinates);
+      return count ? [lonSum / count, latSum / count] : [0, 0];
+    }
+
+    function getFeatureBounds(feature) {
+      let minLat = 90;
+      let maxLat = -90;
+      let minLon = 180;
+      let maxLon = -180;
+      function measure(coords) {
+        if (typeof coords[0] === 'number') {
+          minLon = Math.min(minLon, coords[0]);
+          maxLon = Math.max(maxLon, coords[0]);
+          minLat = Math.min(minLat, coords[1]);
+          maxLat = Math.max(maxLat, coords[1]);
+        } else {
+          coords.forEach(measure);
+        }
+      }
+      measure(feature.geometry.coordinates);
+      return [[minLat, minLon], [maxLat, maxLon]];
+    }
+
+    const COUNTRY_DATA = {
+      'CHN': { population: 1412, gdp: 17963, climate: 14 },
+      'IND': { population: 1408, gdp: 3550, climate: 25 },
+      'USA': { population: 335,  gdp: 25440, climate: 12 },
+      'IDN': { population: 277,  gdp: 1319,  climate: 27 },
+      'PAK': { population: 231,  gdp: 376,   climate: 22 },
+      'BRA': { population: 215,  gdp: 1920,  climate: 25 },
+      'NGA': { population: 218,  gdp: 477,   climate: 28 },
+      'BGD': { population: 170,  gdp: 460,   climate: 26 },
+      'RUS': { population: 144,  gdp: 2245,  climate: 0  },
+      'ETH': { population: 123,  gdp: 111,   climate: 22 },
+      'MEX': { population: 128,  gdp: 1323,  climate: 21 },
+      'JPN': { population: 125,  gdp: 4231,  climate: 16 },
+      'PHL': { population: 115,  gdp: 404,   climate: 27 },
+      'EGY': { population: 105,  gdp: 476,   climate: 22 },
+      'COD': { population: 100,  gdp: 55,    climate: 24 },
+      'VNM': { population: 97,   gdp: 409,   climate: 27 },
+      'IRN': { population: 86,   gdp: 368,   climate: 18 },
+      'TUR': { population: 85,   gdp: 905,   climate: 14 },
+      'DEU': { population: 84,   gdp: 4074,  climate: 10 },
+      'THA': { population: 72,   gdp: 522,   climate: 28 },
+      'GBR': { population: 67,   gdp: 3070,  climate: 11 },
+      'TZA': { population: 64,   gdp: 76,    climate: 23 },
+      'FRA': { population: 68,   gdp: 2782,  climate: 13 },
+      'ZAF': { population: 60,   gdp: 405,   climate: 17 },
+      'MMR': { population: 55,   gdp: 65,    climate: 27 },
+      'KEN': { population: 55,   gdp: 107,   climate: 22 },
+      'KOR': { population: 52,   gdp: 1665,  climate: 13 },
+      'COL': { population: 51,   gdp: 344,   climate: 24 },
+      'ESP': { population: 47,   gdp: 1418,  climate: 16 },
+      'UGA': { population: 47,   gdp: 42,    climate: 23 },
+      'ARG': { population: 46,   gdp: 632,   climate: 16 },
+      'DZA': { population: 45,   gdp: 191,   climate: 12 },
+      'SDN': { population: 45,   gdp: 33,    climate: 25 },
+      'IRQ': { population: 42,   gdp: 264,   climate: 23 },
+      'UKR': { population: 44,   gdp: 160,   climate: 9  },
+      'CAN': { population: 38,   gdp: 2139,  climate: 0  },
+      'MAR': { population: 37,   gdp: 142,   climate: 18 },
+      'SAU': { population: 36,   gdp: 1109,  climate: 26 },
+      'POL': { population: 38,   gdp: 696,   climate: 9  },
+      'MYS': { population: 33,   gdp: 407,   climate: 27 },
+      'MOZ': { population: 32,   gdp: 18,    climate: 23 },
+      'GHA': { population: 32,   gdp: 77,    climate: 27 },
+      'PER': { population: 33,   gdp: 242,   climate: 19 },
+      'AGO': { population: 34,   gdp: 95,    climate: 22 },
+      'AFG': { population: 41,   gdp: 20,    climate: 12 },
+      'VEN': { population: 29,   gdp: 105,   climate: 28 },
+      'MDG': { population: 28,   gdp: 14,    climate: 22 },
+      'CMR': { population: 27,   gdp: 44,    climate: 25 },
+      'CIV': { population: 26,   gdp: 70,    climate: 27 },
+      'NER': { population: 25,   gdp: 15,    climate: 29 },
+      'AUS': { population: 26,   gdp: 1675,  climate: 22 },
+      'ROU': { population: 19,   gdp: 301,   climate: 10 },
+      'NLD': { population: 18,   gdp: 1013,  climate: 11 },
+      'BEL': { population: 11,   gdp: 593,   climate: 11 },
+      'CHE': { population: 9,    gdp: 807,   climate: 9  },
+      'SWE': { population: 10,   gdp: 585,   climate: 6  },
+      'NOR': { population: 5,    gdp: 579,   climate: 4  },
+      'ITA': { population: 60,   gdp: 2011,  climate: 15 },
+      'ARE': { population: 10,   gdp: 507,   climate: 28 },
+      'ISR': { population: 9,    gdp: 522,   climate: 21 },
+      'SGP': { population: 6,    gdp: 397,   climate: 28 },
+      'NZL': { population: 5,    gdp: 245,   climate: 14 },
+      'CHL': { population: 19,   gdp: 301,   climate: 12 },
+      'PRT': { population: 10,   gdp: 254,   climate: 17 },
+      'GRC': { population: 11,   gdp: 219,   climate: 18 },
+      'CZE': { population: 11,   gdp: 290,   climate: 9  },
+      'HUN': { population: 10,   gdp: 179,   climate: 11 },
+      'AUT': { population: 9,    gdp: 471,   climate: 9  },
+      'DNK': { population: 6,    gdp: 395,   climate: 9  },
+      'FIN': { population: 6,    gdp: 283,   climate: 4  },
+      'MYS': { population: 33,   gdp: 407,   climate: 27 },
+      'TWN': { population: 23,   gdp: 790,   climate: 24 },
+      'LKA': { population: 22,   gdp: 83,    climate: 28 },
+      'SYR': { population: 21,   gdp: 23,    climate: 18 },
+      'KAZ': { population: 19,   gdp: 225,   climate: 8  },
+      'MLI': { population: 22,   gdp: 19,    climate: 29 },
+      'BFA': { population: 22,   gdp: 19,    climate: 29 },
+      'MWI': { population: 20,   gdp: 13,    climate: 23 },
+      'ZMB': { population: 19,   gdp: 28,    climate: 20 },
+      'ZWE': { population: 16,   gdp: 26,    climate: 21 },
+      'ECU': { population: 18,   gdp: 115,   climate: 22 },
+      'GTM': { population: 17,   gdp: 85,    climate: 24 },
+      'SOM': { population: 17,   gdp: 9,     climate: 28 },
+      'CUB': { population: 11,   gdp: 107,   climate: 26 },
+      'BOL': { population: 12,   gdp: 44,    climate: 18 },
+      'HTI': { population: 12,   gdp: 20,    climate: 28 },
+      'BLR': { population: 10,   gdp: 73,    climate: 8  },
+      'PRY': { population: 7,    gdp: 40,    climate: 24 },
+      'HND': { population: 10,   gdp: 31,    climate: 25 },
+      'SVN': { population: 2,    gdp: 62,    climate: 11 },
+      'LBY': { population: 7,    gdp: 46,    climate: 20 },
+      'TUN': { population: 12,   gdp: 46,    climate: 19 },
+      'SEN': { population: 17,   gdp: 28,    climate: 28 },
+      'TCD': { population: 17,   gdp: 12,    climate: 27 },
+      'GIN': { population: 13,   gdp: 16,    climate: 27 },
+      'RWA': { population: 14,   gdp: 11,    climate: 21 },
+      'BEN': { population: 13,   gdp: 17,    climate: 28 },
+      'TJK': { population: 10,   gdp: 10,    climate: 11 },
+      'AZE': { population: 10,   gdp: 78,    climate: 15 },
+      'HRV': { population: 4,    gdp: 71,    climate: 13 },
+      'BGR': { population: 7,    gdp: 87,    climate: 12 },
+      'SRB': { population: 7,    gdp: 63,    climate: 12 },
+      'SVK': { population: 6,    gdp: 118,   climate: 10 },
+      'LTU': { population: 3,    gdp: 70,    climate: 8  },
+      'LVA': { population: 2,    gdp: 42,    climate: 7  },
+      'EST': { population: 1,    gdp: 38,    climate: 7  },
+      'QAT': { population: 3,    gdp: 236,   climate: 29 },
+      'KWT': { population: 4,    gdp: 184,   climate: 28 },
+      'OMN': { population: 5,    gdp: 104,   climate: 28 },
+      'BHR': { population: 2,    gdp: 44,    climate: 28 },
+      'JOR': { population: 10,   gdp: 46,    climate: 18 },
+      'LBN': { population: 5,    gdp: 23,    climate: 20 },
+      'HKG': { population: 7,    gdp: 369,   climate: 24 },
+      'MNG': { population: 3,    gdp: 17,    climate: 1  },
+      'PNG': { population: 10,   gdp: 30,    climate: 26 },
+      'FJI': { population: 1,    gdp: 4,     climate: 26 },
+    };
+
+    function enrichFeature(feature) {
+      const iso3 = feature.properties['ISO3166-1-Alpha-3'] || '';
+      const name = feature.properties.name || 'Unknown';
+      feature.properties.name = name;
+      const centroid = getFeatureCentroid(feature);
+
+      if (COUNTRY_DATA[iso3]) {
+        const d = COUNTRY_DATA[iso3];
+        feature.properties.population = d.population;
+        feature.properties.gdp = d.gdp;
+        feature.properties.climate = d.climate;
+      } else {
+        const baseHash = hashString(name);
+        feature.properties.population = Math.max(0.1, Math.round((1 + (baseHash % 25)) * 10) / 10);
+        feature.properties.climate = Math.max(-5, Math.min(32, Math.round((30 - Math.abs(centroid[1]) * 0.4 + ((baseHash % 11) - 5) * 0.4) * 10) / 10));
+        feature.properties.gdp = Math.max(1, Math.round(feature.properties.population * (2 + (baseHash % 15))));
+      }
+
+      feature.bounds = getFeatureBounds(feature);
+      return feature;
+    }
+
+    function buildSearchIndex() {
+      searchIndex = [...places];
+      if (geoData) {
+        geoData.features.forEach(feature => {
+          searchIndex.push({ label: feature.properties.name, bounds: feature.bounds, feature });
+        });
+      }
+    }
+
+    async function initializeDashboard() {
+      document.getElementById('statusTag').textContent = 'Loading country dataset...';
+      try {
+        const response = await fetch('./data/countries.geojson');
+        const data = await response.json();
+        data.features = data.features.map(enrichFeature);
+        geoData = data;
+        overlayLayer = L.geoJSON(geoData, { style: styleFeature, onEachFeature }).addTo(map);
+        buildSearchIndex();
+        updateLegend();
+        updateTopMetrics();
+        document.getElementById('statusTag').textContent = `${capitalize(overlayMode)} overlay`;
+      } catch (error) {
+        console.error('Could not load dataset:', error);
+        document.getElementById('statusTag').textContent = 'Dataset load failed';
+      }
     }
 
     document.querySelectorAll('.control-button').forEach(button => {
@@ -179,7 +496,6 @@
         overlayMode = button.dataset.mode;
         document.querySelectorAll('.control-button').forEach(btn => btn.classList.remove('active'));
         button.classList.add('active');
-        overlayLayer.setStyle(styleFeature);
         updateOverlay();
       });
     });
@@ -191,12 +507,20 @@
       const query = searchInput.value.trim().toLowerCase();
       suggestions.innerHTML = '';
       if (!query) return;
-      places.filter(item => item.label.toLowerCase().includes(query)).slice(0, 6).forEach(item => {
+      searchIndex.filter(item => item.label.toLowerCase().includes(query)).slice(0, 8).forEach(item => {
         const div = document.createElement('div');
         div.className = 'suggestion';
         div.textContent = item.label;
         div.addEventListener('click', () => {
-          map.setView([item.lat, item.lon], 5, { animate:true });
+          if (item.bounds) {
+            map.fitBounds(item.bounds, { padding: [30, 30] });
+          } else {
+            map.flyTo([item.lat, item.lon], 5, { animate: true, duration: 0.8 });
+          }
+          if (item.feature && overlayLayer) {
+            const layer = overlayLayer.getLayers().find(l => l.feature.properties.name === item.label);
+            if (layer) selectFeature(item.feature, layer);
+          }
           searchInput.value = item.label;
           suggestions.innerHTML = '';
         });
@@ -205,12 +529,31 @@
     });
 
     document.getElementById('zoomHome').addEventListener('click', () => {
-      map.setView([20, 0], 2, { animate:true });
+      map.flyTo([20, 0], 2, { animate: true, duration: 0.8 });
       searchInput.value = '';
       suggestions.innerHTML = '';
     });
 
-    updateLegend();
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.search-group') && !e.target.closest('.suggestions')) {
+        suggestions.innerHTML = '';
+      }
+    });
+
+    document.addEventListener('keydown', (e) => {
+      if ((e.key === '/' || (e.ctrlKey && e.key === 'f')) && document.activeElement !== searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+      }
+      if (e.key === 'Escape') {
+        searchInput.value = '';
+        suggestions.innerHTML = '';
+        searchInput.blur();
+      }
+    });
+
+    createCityMarkers().forEach(marker => marker.addTo(map));
+    initializeDashboard();
   </script>
 </body>
 </html>
