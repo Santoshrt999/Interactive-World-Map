@@ -4,847 +4,953 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Visual Geography Intelligence</title>
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+  <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
   <style>
     :root {
-      color-scheme: dark;
-      --bg: #050914;
-      --panel: rgba(10, 16, 30, 0.88);
-      --panel-border: rgba(255, 255, 255, 0.08);
-      --text: #edf4ff;
-      --muted: #9bb2d6;
-      --accent: #7e6bff;
-      --accent-soft: rgba(126, 107, 255, 0.14);
-      --warning: #ffb65b;
+      --bg:           #02040e;
+      --panel:        rgba(6, 10, 26, 0.88);
+      --panel-border: rgba(255,255,255,0.07);
+      --text:         #e8f0ff;
+      --muted:        #5a7498;
+      --accent:       #7c6dfa;
+      --accent2:      #00d2d3;
+      --success:      #00b894;
+      --warning:      #fdcb6e;
+      --card-bg:      rgba(255,255,255,0.04);
+      --card-border:  rgba(255,255,255,0.07);
+      --sidebar-w:    380px;
     }
-    * { box-sizing: border-box; }
-    html, body { margin: 0; padding: 0; width: 100%; height: 100%; font-family: Inter, system-ui, sans-serif; background: #03050d; color: var(--text); }
-    body { overflow: hidden; }
-    #map { position: absolute; inset: 0; z-index: 1; }
-    .dashboard { position: absolute; top: 16px; left: 16px; width: min(420px, calc(100% - 32px)); max-height: calc(100% - 32px); display: grid; gap: 16px; z-index: 1000; overflow-y: auto; scrollbar-width: none; }
-    .dashboard::-webkit-scrollbar { display: none; }
-    .panel { backdrop-filter: blur(30px); background: var(--panel); border: 1px solid var(--panel-border); border-radius: 28px; padding: 24px; box-shadow: 0 28px 80px rgba(0,0,0,0.28); }
-    .panel h1 { margin: 0 0 4px; font-size: 20px; letter-spacing: 0.02em; }
-    .subtitle { margin: 0 0 16px; font-size: 13px; line-height: 1.6; color: var(--muted); }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      width: 100%; height: 100%; overflow: hidden;
+      background: var(--bg); color: var(--text);
+      font-family: Inter, system-ui, -apple-system, sans-serif;
+    }
 
-    /* Tabs */
-    .tab-nav { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-bottom: 16px; }
-    .tab-btn { border: none; border-radius: 12px; padding: 9px 4px; background: rgba(255,255,255,0.06); color: var(--muted); cursor: pointer; font-size: 11px; font-weight: 600; transition: background .15s, color .15s; }
-    .tab-btn:hover { background: rgba(255,255,255,0.10); color: var(--text); }
-    .tab-btn.active { background: var(--accent-soft); color: var(--text); border: 1px solid rgba(126,107,255,0.3); }
+    /* star field */
+    body::before {
+      content: ''; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        radial-gradient(circle, rgba(255,255,255,.12) .5px, transparent .5px),
+        radial-gradient(circle, rgba(255,255,255,.08) .5px, transparent .5px),
+        radial-gradient(circle, rgba(255,255,255,.10) .5px, transparent .5px),
+        radial-gradient(circle, rgba(255,255,255,.06) .5px, transparent .5px),
+        radial-gradient(circle, rgba(255,255,255,.09) .5px, transparent .5px),
+        radial-gradient(circle, rgba(255,255,255,.07) .5px, transparent .5px),
+        radial-gradient(circle, rgba(255,255,255,.11) .5px, transparent .5px),
+        radial-gradient(circle, rgba(255,255,255,.05) .5px, transparent .5px);
+      background-size: 320px 320px, 240px 240px, 280px 280px, 200px 200px,
+                       350px 350px, 180px 180px, 300px 300px, 220px 220px;
+      background-position: 15% 25%, 85% 15%, 45% 75%, 70% 55%,
+                           25% 65%, 92% 80%, 60% 10%, 38% 42%;
+    }
 
-    /* Overlay buttons */
-    .toolbar { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 16px; }
-    .toolbar button { border: none; border-radius: 14px; padding: 12px 8px; background: rgba(255,255,255,0.08); color: var(--text); cursor: pointer; transition: transform .15s, background .15s; font-weight: 600; font-size: 12px; line-height: 1.3; }
-    .toolbar button.active, .toolbar button:hover { background: linear-gradient(135deg, rgba(126,107,255,0.92), rgba(61,179,255,0.92)); transform: translateY(-1px); }
-    .toolbar button.pending { opacity: 0.55; cursor: default; }
-    .toolbar button .tag { display: block; font-size: 9px; font-weight: 400; opacity: 0.75; margin-top: 2px; }
+    #map { position: fixed; inset: 0; z-index: 1; }
 
-    /* Search */
-    .search-group { display: grid; gap: 10px; margin-bottom: 16px; }
-    .search-group input { width: 100%; border: none; border-radius: 16px; padding: 14px 16px; background: rgba(255,255,255,0.08); color: var(--text); font-size: 14px; outline: none; }
-    .search-group input::placeholder { color: var(--muted); }
-    .search-group button { border: none; border-radius: 16px; padding: 14px 18px; background: var(--accent); color: #fff; cursor: pointer; font-weight: 700; }
-    .suggestions { max-height: 190px; overflow: auto; border-radius: 20px; border: 1px solid rgba(255,255,255,0.08); background: rgba(8,12,24,0.96); margin-bottom: 16px; }
-    .suggestion { padding: 14px 16px; cursor: pointer; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 14px; }
-    .suggestion:last-child { border-bottom: none; }
-    .suggestion:hover { background: rgba(126,107,255,0.14); }
+    /* ── Sidebar ─────────────────────────────────────────────────────────── */
+    #sidebar {
+      position: fixed; top: 0; left: 0; height: 100vh;
+      width: var(--sidebar-w); z-index: 100;
+      display: flex; flex-direction: column; gap: 12px;
+      padding: 20px 16px 24px;
+      background: var(--panel);
+      backdrop-filter: blur(40px) saturate(1.6);
+      -webkit-backdrop-filter: blur(40px) saturate(1.6);
+      border-right: 1px solid var(--panel-border);
+      overflow-y: auto; scrollbar-width: none;
+      animation: slideInLeft .55s cubic-bezier(.16,1,.3,1) both;
+    }
+    #sidebar::-webkit-scrollbar { display: none; }
+    @keyframes slideInLeft { from { transform: translateX(-100%); opacity: 0; } }
 
-    /* Stats */
-    .stats-grid { display: grid; gap: 14px; grid-template-columns: repeat(2, minmax(0,1fr)); }
-    .metric-card { border-radius: 22px; padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06); }
-    .metric-card h3 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: .14em; color: var(--muted); }
-    .metric-card p { margin: 0; font-size: 22px; font-weight: 800; }
-    .info-panel { margin-top: 18px; border-radius: 22px; border: 1px solid rgba(255,255,255,0.06); background: rgba(255,255,255,0.05); padding: 18px; }
-    .info-panel strong { display: block; margin-bottom: 10px; font-size: 14px; color: #fff; }
-    .info-row { margin-bottom: 7px; color: var(--muted); font-size: 13px; }
-    .info-source { margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); font-size: 11px; color: var(--muted); line-height: 1.6; }
-    .info-source a { color: var(--accent); text-decoration: none; }
-    .info-source a:hover { text-decoration: underline; }
+    /* header */
+    .hd-title { font-size: 17px; font-weight: 800; letter-spacing: -.01em; }
+    .hd-sub   { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+    .pulse-dot {
+      display: inline-block; width: 6px; height: 6px; border-radius: 50%;
+      background: var(--success); margin-right: 5px;
+      box-shadow: 0 0 5px var(--success);
+      animation: blink 2.2s ease infinite;
+    }
+    @keyframes blink { 50% { opacity: .3; } }
 
-    /* Legend + attribution */
-    .legend { display: grid; gap: 10px; margin-top: 16px; }
-    .legend-item { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--muted); }
-    .legend-swatch { width: 22px; height: 22px; border-radius: 10px; box-shadow: 0 0 0 1px rgba(255,255,255,0.08); flex-shrink: 0; }
-    .source-credit { margin-top: 10px; padding: 10px 14px; background: rgba(255,255,255,0.04); border-radius: 12px; font-size: 11px; color: var(--muted); line-height: 1.6; }
-    .source-credit a { color: var(--accent); text-decoration: none; }
-    .source-credit a:hover { text-decoration: underline; }
-    .pending-notice { margin-top: 12px; padding: 12px 14px; background: rgba(255,182,91,0.08); border: 1px solid rgba(255,182,91,0.2); border-radius: 14px; font-size: 12px; color: var(--warning); line-height: 1.6; }
-    .pending-notice code { font-family: monospace; }
+    /* tabs */
+    .tab-nav { display: grid; grid-template-columns: repeat(4,1fr); gap: 4px; }
+    .tab-btn {
+      border: 1px solid transparent; border-radius: 10px;
+      padding: 9px 4px; background: var(--card-bg); color: var(--muted);
+      cursor: pointer; font-size: 11px; font-weight: 600; text-align: center;
+      transition: all .18s ease; letter-spacing: .02em;
+    }
+    .tab-btn:hover { background: rgba(255,255,255,.07); color: var(--text); }
+    .tab-btn.active {
+      background: linear-gradient(135deg,rgba(124,109,250,.3),rgba(0,210,211,.15));
+      border-color: rgba(124,109,250,.4); color: var(--text);
+      box-shadow: 0 0 14px rgba(124,109,250,.2);
+    }
 
-    /* Top list */
-    .toplist { padding: 18px; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06); border-radius: 22px; }
-    .toplist h2 { margin: 0 0 12px; font-size: 14px; color: var(--muted); }
-    .top-item { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.06); font-size: 13px; }
-    .top-item:last-child { border-bottom: none; }
-    .top-item strong { color: #fff; }
-    .status-chip { display: inline-flex; align-items: center; padding: 8px 13px; border-radius: 16px; background: rgba(126,107,255,0.18); color: #e9f2ff; font-size: 12px; white-space: nowrap; flex-shrink: 0; }
+    /* search */
+    .search-wrap { position: relative; }
+    .search-wrap input {
+      width: 100%; border: 1px solid var(--card-border); border-radius: 12px;
+      padding: 11px 14px; background: var(--card-bg); color: var(--text);
+      font-size: 13px; outline: none;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .search-wrap input:focus {
+      border-color: rgba(124,109,250,.5);
+      box-shadow: 0 0 0 3px rgba(124,109,250,.1);
+    }
+    .search-wrap input::placeholder { color: var(--muted); }
+    #suggestions {
+      position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+      background: rgba(8,12,28,.98); border: 1px solid var(--card-border);
+      border-radius: 12px; overflow: hidden; z-index: 200;
+      max-height: 180px; overflow-y: auto; display: none;
+    }
+    #suggestions.open { display: block; }
+    .sug-item {
+      padding: 10px 14px; cursor: pointer; font-size: 13px;
+      border-bottom: 1px solid var(--card-border);
+      transition: background .12s;
+    }
+    .sug-item:last-child { border-bottom: none; }
+    .sug-item:hover { background: rgba(124,109,250,.16); }
 
-    /* Leaflet overrides */
-    .leaflet-container { font: 14px/1.4 Inter, system-ui, sans-serif; }
-    .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: rgba(8,12,24,0.96); color: #eef2ff; border: 1px solid rgba(255,255,255,0.10); }
-    .leaflet-popup-content { margin: 12px 16px; }
-    .leaflet-popup-content p { margin: 4px 0; font-size: 13px; }
-    .popup-source { font-size: 11px; color: #9bb2d6; margin-top: 8px; padding-top: 6px; border-top: 1px solid rgba(255,255,255,0.08); }
-    .popup-source a { color: #9bb2d6; }
-    .leaflet-tooltip { background: rgba(17,24,39,0.96); color: #edf4ff; border: none; box-shadow: 0 12px 34px rgba(0,0,0,0.22); }
+    /* overlay buttons */
+    .overlay-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; }
+    .overlay-btn {
+      border: 1px solid var(--card-border); border-radius: 12px;
+      padding: 13px 6px; background: var(--card-bg); color: var(--text);
+      cursor: pointer; font-size: 11px; font-weight: 600; text-align: center;
+      line-height: 1.4; transition: all .2s cubic-bezier(.16,1,.3,1);
+    }
+    .overlay-btn .icon { display: block; font-size: 20px; margin-bottom: 5px; }
+    .overlay-btn:hover  { background: rgba(255,255,255,.07); transform: translateY(-1px); }
+    .overlay-btn.active {
+      background: linear-gradient(135deg,rgba(124,109,250,.32),rgba(0,210,211,.18));
+      border-color: rgba(124,109,250,.5);
+      box-shadow: 0 4px 22px rgba(124,109,250,.22), inset 0 1px 0 rgba(255,255,255,.08);
+      transform: translateY(-1px);
+    }
+
+    /* stats */
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .stat-card {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 14px; padding: 14px 12px;
+      transition: background .18s;
+    }
+    .stat-card:hover { background: rgba(255,255,255,.06); }
+    .stat-label { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 6px; }
+    .stat-val   { font-size: 20px; font-weight: 800; line-height: 1; transition: opacity .25s; }
+    .stat-sub   { font-size: 10px; color: var(--muted); margin-top: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+    /* legend */
+    .legend-label { font-size: 11px; color: var(--muted); margin-bottom: 6px; font-weight: 500; }
+    .legend-bar   { height: 8px; border-radius: 100px; margin-bottom: 4px; transition: background 0.5s ease; }
+    .legend-ticks { display: flex; justify-content: space-between; font-size: 10px; color: var(--muted); }
+
+    /* source */
+    .source-wrap {
+      font-size: 10px; color: var(--muted); line-height: 1.7;
+      padding: 10px 12px; background: var(--card-bg);
+      border-radius: 10px; border: 1px solid var(--card-border);
+    }
+    .source-wrap a { color: var(--accent2); text-decoration: none; }
+    .source-wrap a:hover { text-decoration: underline; }
+    .source-wrap code {
+      font-family: monospace; background: rgba(255,255,255,.06);
+      padding: 1px 5px; border-radius: 4px; font-size: 10px;
+    }
+
+    /* ── Country panel ───────────────────────────────────────────────────── */
+    #country-panel {
+      position: fixed; bottom: 24px; right: 24px; width: 320px;
+      z-index: 100; display: none;
+      background: var(--panel);
+      backdrop-filter: blur(40px) saturate(1.6);
+      -webkit-backdrop-filter: blur(40px) saturate(1.6);
+      border: 1px solid var(--panel-border); border-radius: 22px;
+      padding: 20px; box-shadow: 0 24px 64px rgba(0,0,0,.5);
+    }
+    #country-panel.open {
+      display: block;
+      animation: slideUp .4s cubic-bezier(.16,1,.3,1) both;
+    }
+    @keyframes slideUp { from { transform: translateY(18px); opacity: 0; } }
+
+    .cp-close {
+      position: absolute; top: 12px; right: 12px;
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 8px; width: 28px; height: 28px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 12px; transition: all .15s;
+    }
+    .cp-close:hover { background: rgba(255,255,255,.1); color: var(--text); }
+    .cp-name   { font-size: 16px; font-weight: 700; margin-bottom: 2px; padding-right: 32px; }
+    .cp-metric { font-size: 11px; color: var(--muted); margin-bottom: 12px; }
+    .cp-val    { font-size: 34px; font-weight: 900; line-height: 1; margin-bottom: 8px; }
+    .cp-bar-bg { background: rgba(255,255,255,.06); border-radius: 100px; height: 6px; margin-bottom: 16px; overflow: hidden; }
+    .cp-bar    { height: 100%; border-radius: 100px; background: var(--accent); transition: width .6s cubic-bezier(.16,1,.3,1); }
+    #chartWrap { height: 180px; margin-bottom: 8px; }
+    .cp-src    { font-size: 10px; color: var(--muted); }
+
+    /* ── Loading ─────────────────────────────────────────────────────────── */
+    #loading {
+      position: fixed; inset: 0; z-index: 999;
+      background: var(--bg); display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
+      transition: opacity .5s ease;
+    }
+    #loading.fade-out { opacity: 0; pointer-events: none; }
+    .spin {
+      width: 52px; height: 52px; border-radius: 50%;
+      border: 2px solid rgba(124,109,250,.25);
+      border-top-color: var(--accent);
+      animation: rotate 1s linear infinite;
+    }
+    @keyframes rotate { to { transform: rotate(360deg); } }
+    .load-txt { font-size: 13px; color: var(--muted); }
+
+    /* ── MapLibre overrides ───────────────────────────────────────────────── */
+    .maplibregl-ctrl-bottom-right { right: 8px; bottom: 8px; }
+    .maplibregl-ctrl-bottom-left  { left: calc(var(--sidebar-w) + 8px); }
+    .maplibregl-ctrl-attrib       { font-size: 10px; }
+    .maplibregl-ctrl button { border-radius: 8px !important; }
+
+    /* ── Mobile ───────────────────────────────────────────────────────────── */
+    @media (max-width: 680px) {
+      :root { --sidebar-w: 100vw; }
+      #sidebar {
+        top: auto; bottom: 0; height: 52vh;
+        border-right: none; border-top: 1px solid var(--panel-border);
+        animation: slideInUp .45s cubic-bezier(.16,1,.3,1) both;
+      }
+      @keyframes slideInUp { from { transform: translateY(100%); } }
+      #country-panel { display: none !important; }
+    }
   </style>
 </head>
 <body>
-  <div id="map"></div>
-  <div class="dashboard">
-    <section class="panel">
-      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:14px;">
-        <div style="min-width:0;">
-          <h1>Visual Geography Intelligence</h1>
-          <p class="subtitle" id="tabSubtitle">Choropleth overlays with real country data across 258 countries.</p>
-        </div>
-        <span class="status-chip" id="statusTag">Loading...</span>
-      </div>
 
-      <div class="tab-nav" id="tabNav">
-        <button class="tab-btn active" data-tab="explorer">Explorer</button>
-        <button class="tab-btn" data-tab="climate">Climate</button>
-        <button class="tab-btn" data-tab="health">Health</button>
-        <button class="tab-btn" data-tab="humanitarian">Humanitarian</button>
-      </div>
+<div id="loading">
+  <div class="spin"></div>
+  <div class="load-txt">Rendering globe…</div>
+</div>
 
-      <div class="search-group">
-        <input id="search" placeholder="Search city or country  (/)" autocomplete="off" />
-        <button id="zoomHome">Reset</button>
-      </div>
-      <div id="suggestions" class="suggestions"></div>
+<div id="map"></div>
 
-      <div class="toolbar" id="overlayToolbar"></div>
-
-      <div class="stats-grid">
-        <div class="metric-card"><h3>Overlay</h3><p id="currentMode">—</p></div>
-        <div class="metric-card"><h3>Countries</h3><p id="regionCount">—</p></div>
-        <div class="metric-card"><h3>Average</h3><p id="averageValue">—</p></div>
-        <div class="metric-card"><h3>Selected</h3><p id="selectedValue">None</p></div>
-      </div>
-
-      <div class="info-panel">
-        <strong id="infoTitle">Click a region to see details</strong>
-        <div class="info-row" id="infoPopulation">Population: —</div>
-        <div class="info-row" id="infoClimate">Avg temp: —</div>
-        <div class="info-row" id="infoGdp">GDP: —</div>
-        <div class="info-source" id="infoSource" style="display:none;"></div>
-      </div>
-
-      <div class="legend" id="legend"></div>
-      <div class="source-credit" id="sourceCredit" style="display:none;"></div>
-      <div class="pending-notice" id="pendingNotice" style="display:none;">
-        Dataset not yet loaded. Run <code>python3 scripts/fetch_data.py</code> to pull real data, then refresh.
-      </div>
-    </section>
-
-    <section class="panel toplist">
-      <h2 id="topListTitle">Top 3 countries</h2>
-      <div id="topList"></div>
-    </section>
+<aside id="sidebar">
+  <div>
+    <div class="hd-title">🌍 Visual Geography Intelligence</div>
+    <div class="hd-sub"><span class="pulse-dot"></span>Real data · 258 countries · Open source</div>
   </div>
 
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-  <script>
-  // ── City list for search ────────────────────────────────────────────────────
-  const places = [
-    { label: 'Tokyo, Japan',            lat: 35.6895,  lon: 139.6917  },
-    { label: 'New York, USA',           lat: 40.7128,  lon: -74.0060  },
-    { label: 'London, UK',              lat: 51.5074,  lon: -0.1278   },
-    { label: 'Paris, France',           lat: 48.8566,  lon: 2.3522    },
-    { label: 'Sydney, Australia',       lat: -33.8688, lon: 151.2093  },
-    { label: 'São Paulo, Brazil',       lat: -23.5505, lon: -46.6333  },
-    { label: 'Mumbai, India',           lat: 19.0760,  lon: 72.8777   },
-    { label: 'Cairo, Egypt',            lat: 30.0444,  lon: 31.2357   },
-    { label: 'Moscow, Russia',          lat: 55.7558,  lon: 37.6173   },
-    { label: 'Toronto, Canada',         lat: 43.6532,  lon: -79.3832  },
-    { label: 'Berlin, Germany',         lat: 52.5200,  lon: 13.4050   },
-    { label: 'Nairobi, Kenya',          lat: -1.2921,  lon: 36.8219   },
-    { label: 'Singapore',              lat: 1.3521,   lon: 103.8198  },
-    { label: 'Cape Town, South Africa', lat: -33.9249, lon: 18.4241   },
-    { label: 'Los Angeles, USA',        lat: 34.0522,  lon: -118.2437 },
-    { label: 'Mexico City, Mexico',     lat: 19.4326,  lon: -99.1332  },
-    { label: 'Buenos Aires, Argentina', lat: -34.6037, lon: -58.3816  },
-    { label: 'Jakarta, Indonesia',      lat: -6.2088,  lon: 106.8456  },
-    { label: 'Shanghai, China',         lat: 31.2304,  lon: 121.4737  },
-  ];
+  <nav class="tab-nav" id="tabNav">
+    <button class="tab-btn active" data-tab="explorer">Explorer</button>
+    <button class="tab-btn" data-tab="climate">Climate</button>
+    <button class="tab-btn" data-tab="health">Health</button>
+    <button class="tab-btn" data-tab="humanitarian">Aid</button>
+  </nav>
 
-  // ── Overlay metadata ────────────────────────────────────────────────────────
-  // colorScale: [lowColor, highColor] as [r,g,b] arrays
-  const OVERLAY_META = {
-    // Explorer tab — data embedded in COUNTRY_DATA
-    population: {
-      label: 'Population', prop: 'population', unitSuffix: 'M',
-      source: 'World Bank', year: '2022',
-      sourceUrl: 'https://data.worldbank.org/indicator/SP.POP.TOTL',
-      license: 'CC BY 4.0',
-    },
-    climate: {
-      label: 'Avg Temperature', prop: 'climate', unitSuffix: '°C',
-      source: 'World Bank Climate Data', year: '2022',
-      sourceUrl: 'https://climateknowledgeportal.worldbank.org/',
-      license: 'CC BY 4.0',
-    },
-    gdp: {
-      label: 'GDP', prop: 'gdp', unitSuffix: 'B USD',
-      source: 'World Bank', year: '2022',
-      sourceUrl: 'https://data.worldbank.org/indicator/NY.GDP.MKTP.CD',
-      license: 'CC BY 4.0',
-    },
-    // Climate tab — loaded from web/data/dashboards/climate/
-    temperature: {
-      label: 'Warming Impact', file: 'climate/temperature',
-      source: 'Our World in Data / Global Carbon Project', year: '2022',
-      sourceUrl: 'https://github.com/owid/co2-data',
-      license: 'CC BY 4.0',
-      colorScale: [[210, 235, 255], [200, 30, 30]], // light blue → deep red
-    },
-    co2: {
-      label: 'CO₂ / Capita', file: 'climate/co2',
-      source: 'Our World in Data / Global Carbon Project', year: '2022',
-      sourceUrl: 'https://github.com/owid/co2-data',
-      license: 'CC BY 4.0',
-      colorScale: [[255, 245, 220], [180, 35, 20]], // cream → dark red
-    },
-    renewable: {
-      label: 'Renewable %', file: 'climate/renewable',
-      source: 'Our World in Data / IEA', year: '2022',
-      sourceUrl: 'https://github.com/owid/energy-data',
-      license: 'CC BY 4.0',
-      colorScale: [[220, 255, 225], [20, 120, 50]], // light → deep green
-    },
-    // Health tab — loaded from web/data/dashboards/health/
-    vaccination: {
-      label: 'Vaccination', file: 'health/vaccination',
-      source: 'World Bank / WHO', year: '2022',
-      sourceUrl: 'https://data.worldbank.org/indicator/SH.IMM.MEAS',
-      license: 'CC BY 4.0',
-      colorScale: [[255, 240, 220], [100, 50, 180]], // light → purple
-    },
-    life_expectancy: {
-      label: 'Life Expectancy', file: 'health/life_expectancy',
-      source: 'World Bank', year: '2022',
-      sourceUrl: 'https://data.worldbank.org/indicator/SP.DYN.LE00.IN',
-      license: 'CC BY 4.0',
-      colorScale: [[200, 40, 40], [50, 160, 100]],  // red → green (higher = better)
-    },
-    healthcare: {
-      label: 'Health Spending', file: 'health/healthcare',
-      source: 'World Bank / WHO', year: '2021',
-      sourceUrl: 'https://data.worldbank.org/indicator/SH.XPD.CHEX.PC.CD',
-      license: 'CC BY 4.0',
-      colorScale: [[220, 240, 255], [20, 80, 150]],  // light → deep blue
-    },
-    // Humanitarian tab — loaded from web/data/dashboards/humanitarian/
-    refugees: {
-      label: 'Refugees', file: 'humanitarian/refugees',
-      source: 'UNHCR', year: '2023',
-      sourceUrl: 'https://www.unhcr.org/refugee-statistics/',
-      license: 'Open (UNHCR)',
-      colorScale: [[255, 245, 225], [180, 70, 15]], // cream → dark orange
-    },
-    poverty: {
-      label: 'Extreme Poverty', file: 'humanitarian/poverty',
-      source: 'World Bank', year: '2022',
-      sourceUrl: 'https://data.worldbank.org/indicator/SI.POV.DDAY',
-      license: 'CC BY 4.0',
-      colorScale: [[50, 160, 100], [200, 30, 30]],  // green → red (higher = worse)
-    },
-    conflicts: {
-      label: 'Conflict Deaths', file: 'humanitarian/conflicts',
-      source: 'World Bank / UCDP Uppsala', year: '2022',
-      sourceUrl: 'https://data.worldbank.org/indicator/VC.BTL.DETH',
-      license: 'CC BY 4.0',
-      colorScale: [[255, 245, 230], [150, 15, 15]], // cream → dark red
-    },
-  };
+  <div class="search-wrap">
+    <input id="searchInput" type="text" placeholder="🔍  Search country…" autocomplete="off" />
+    <div id="suggestions"></div>
+  </div>
 
-  const TABS = {
-    explorer: {
-      subtitle: 'Choropleth overlays with real country data across 258 countries.',
-      overlays: ['population', 'climate', 'gdp'],
-      category: null,
-    },
-    climate: {
-      subtitle: 'Temperature anomalies, CO₂ emissions, and renewable energy progress.',
-      overlays: ['temperature', 'co2', 'renewable'],
-      category: 'climate',
-    },
-    health: {
-      subtitle: 'Vaccination coverage, life expectancy, and healthcare access worldwide.',
-      overlays: ['vaccination', 'life_expectancy', 'healthcare'],
-      category: 'health',
-    },
-    humanitarian: {
-      subtitle: 'Refugee populations, extreme poverty, and active conflict zones.',
-      overlays: ['refugees', 'poverty', 'conflicts'],
-      category: 'humanitarian',
-    },
-  };
+  <div class="overlay-grid" id="overlayGrid"></div>
 
-  // ── Embedded country data (World Bank 2022, CC BY 4.0) ─────────────────────
-  const COUNTRY_DATA = {
-    'CHN': { population: 1412, gdp: 17963, climate: 14 },
-    'IND': { population: 1408, gdp: 3550,  climate: 25 },
-    'USA': { population: 335,  gdp: 25440, climate: 12 },
-    'IDN': { population: 277,  gdp: 1319,  climate: 27 },
-    'PAK': { population: 231,  gdp: 376,   climate: 22 },
-    'BRA': { population: 215,  gdp: 1920,  climate: 25 },
-    'NGA': { population: 218,  gdp: 477,   climate: 28 },
-    'BGD': { population: 170,  gdp: 460,   climate: 26 },
-    'RUS': { population: 144,  gdp: 2245,  climate: 0  },
-    'ETH': { population: 123,  gdp: 111,   climate: 22 },
-    'MEX': { population: 128,  gdp: 1323,  climate: 21 },
-    'JPN': { population: 125,  gdp: 4231,  climate: 16 },
-    'PHL': { population: 115,  gdp: 404,   climate: 27 },
-    'EGY': { population: 105,  gdp: 476,   climate: 22 },
-    'COD': { population: 100,  gdp: 55,    climate: 24 },
-    'VNM': { population: 97,   gdp: 409,   climate: 27 },
-    'IRN': { population: 86,   gdp: 368,   climate: 18 },
-    'TUR': { population: 85,   gdp: 905,   climate: 14 },
-    'DEU': { population: 84,   gdp: 4074,  climate: 10 },
-    'THA': { population: 72,   gdp: 522,   climate: 28 },
-    'GBR': { population: 67,   gdp: 3070,  climate: 11 },
-    'TZA': { population: 64,   gdp: 76,    climate: 23 },
-    'FRA': { population: 68,   gdp: 2782,  climate: 13 },
-    'ZAF': { population: 60,   gdp: 405,   climate: 17 },
-    'MMR': { population: 55,   gdp: 65,    climate: 27 },
-    'KEN': { population: 55,   gdp: 107,   climate: 22 },
-    'KOR': { population: 52,   gdp: 1665,  climate: 13 },
-    'COL': { population: 51,   gdp: 344,   climate: 24 },
-    'ESP': { population: 47,   gdp: 1418,  climate: 16 },
-    'UGA': { population: 47,   gdp: 42,    climate: 23 },
-    'ARG': { population: 46,   gdp: 632,   climate: 16 },
-    'DZA': { population: 45,   gdp: 191,   climate: 12 },
-    'SDN': { population: 45,   gdp: 33,    climate: 25 },
-    'IRQ': { population: 42,   gdp: 264,   climate: 23 },
-    'UKR': { population: 44,   gdp: 160,   climate: 9  },
-    'CAN': { population: 38,   gdp: 2139,  climate: 0  },
-    'MAR': { population: 37,   gdp: 142,   climate: 18 },
-    'SAU': { population: 36,   gdp: 1109,  climate: 26 },
-    'POL': { population: 38,   gdp: 696,   climate: 9  },
-    'MYS': { population: 33,   gdp: 407,   climate: 27 },
-    'MOZ': { population: 32,   gdp: 18,    climate: 23 },
-    'GHA': { population: 32,   gdp: 77,    climate: 27 },
-    'PER': { population: 33,   gdp: 242,   climate: 19 },
-    'AGO': { population: 34,   gdp: 95,    climate: 22 },
-    'AFG': { population: 41,   gdp: 20,    climate: 12 },
-    'VEN': { population: 29,   gdp: 105,   climate: 28 },
-    'MDG': { population: 28,   gdp: 14,    climate: 22 },
-    'CMR': { population: 27,   gdp: 44,    climate: 25 },
-    'CIV': { population: 26,   gdp: 70,    climate: 27 },
-    'NER': { population: 25,   gdp: 15,    climate: 29 },
-    'AUS': { population: 26,   gdp: 1675,  climate: 22 },
-    'ROU': { population: 19,   gdp: 301,   climate: 10 },
-    'NLD': { population: 18,   gdp: 1013,  climate: 11 },
-    'BEL': { population: 11,   gdp: 593,   climate: 11 },
-    'CHE': { population: 9,    gdp: 807,   climate: 9  },
-    'SWE': { population: 10,   gdp: 585,   climate: 6  },
-    'NOR': { population: 5,    gdp: 579,   climate: 4  },
-    'ITA': { population: 60,   gdp: 2011,  climate: 15 },
-    'ARE': { population: 10,   gdp: 507,   climate: 28 },
-    'ISR': { population: 9,    gdp: 522,   climate: 21 },
-    'SGP': { population: 6,    gdp: 397,   climate: 28 },
-    'NZL': { population: 5,    gdp: 245,   climate: 14 },
-    'CHL': { population: 19,   gdp: 301,   climate: 12 },
-    'PRT': { population: 10,   gdp: 254,   climate: 17 },
-    'GRC': { population: 11,   gdp: 219,   climate: 18 },
-    'CZE': { population: 11,   gdp: 290,   climate: 9  },
-    'HUN': { population: 10,   gdp: 179,   climate: 11 },
-    'AUT': { population: 9,    gdp: 471,   climate: 9  },
-    'DNK': { population: 6,    gdp: 395,   climate: 9  },
-    'FIN': { population: 6,    gdp: 283,   climate: 4  },
-    'TWN': { population: 23,   gdp: 790,   climate: 24 },
-    'LKA': { population: 22,   gdp: 83,    climate: 28 },
-    'SYR': { population: 21,   gdp: 23,    climate: 18 },
-    'KAZ': { population: 19,   gdp: 225,   climate: 8  },
-    'MLI': { population: 22,   gdp: 19,    climate: 29 },
-    'BFA': { population: 22,   gdp: 19,    climate: 29 },
-    'MWI': { population: 20,   gdp: 13,    climate: 23 },
-    'ZMB': { population: 19,   gdp: 28,    climate: 20 },
-    'ZWE': { population: 16,   gdp: 26,    climate: 21 },
-    'ECU': { population: 18,   gdp: 115,   climate: 22 },
-    'GTM': { population: 17,   gdp: 85,    climate: 24 },
-    'SOM': { population: 17,   gdp: 9,     climate: 28 },
-    'CUB': { population: 11,   gdp: 107,   climate: 26 },
-    'BOL': { population: 12,   gdp: 44,    climate: 18 },
-    'HTI': { population: 12,   gdp: 20,    climate: 28 },
-    'BLR': { population: 10,   gdp: 73,    climate: 8  },
-    'PRY': { population: 7,    gdp: 40,    climate: 24 },
-    'HND': { population: 10,   gdp: 31,    climate: 25 },
-    'SVN': { population: 2,    gdp: 62,    climate: 11 },
-    'LBY': { population: 7,    gdp: 46,    climate: 20 },
-    'TUN': { population: 12,   gdp: 46,    climate: 19 },
-    'SEN': { population: 17,   gdp: 28,    climate: 28 },
-    'TCD': { population: 17,   gdp: 12,    climate: 27 },
-    'GIN': { population: 13,   gdp: 16,    climate: 27 },
-    'RWA': { population: 14,   gdp: 11,    climate: 21 },
-    'BEN': { population: 13,   gdp: 17,    climate: 28 },
-    'TJK': { population: 10,   gdp: 10,    climate: 11 },
-    'AZE': { population: 10,   gdp: 78,    climate: 15 },
-    'HRV': { population: 4,    gdp: 71,    climate: 13 },
-    'BGR': { population: 7,    gdp: 87,    climate: 12 },
-    'SRB': { population: 7,    gdp: 63,    climate: 12 },
-    'SVK': { population: 6,    gdp: 118,   climate: 10 },
-    'LTU': { population: 3,    gdp: 70,    climate: 8  },
-    'LVA': { population: 2,    gdp: 42,    climate: 7  },
-    'EST': { population: 1,    gdp: 38,    climate: 7  },
-    'QAT': { population: 3,    gdp: 236,   climate: 29 },
-    'KWT': { population: 4,    gdp: 184,   climate: 28 },
-    'OMN': { population: 5,    gdp: 104,   climate: 28 },
-    'BHR': { population: 2,    gdp: 44,    climate: 28 },
-    'JOR': { population: 10,   gdp: 46,    climate: 18 },
-    'LBN': { population: 5,    gdp: 23,    climate: 20 },
-    'HKG': { population: 7,    gdp: 369,   climate: 24 },
-    'MNG': { population: 3,    gdp: 17,    climate: 1  },
-    'PNG': { population: 10,   gdp: 30,    climate: 26 },
-    'FJI': { population: 1,    gdp: 4,     climate: 26 },
-  };
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-label">Countries</div>
+      <div class="stat-val" id="statCountries">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Average</div>
+      <div class="stat-val" id="statAvg">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Highest</div>
+      <div class="stat-val" id="statMax">—</div>
+      <div class="stat-sub" id="statMaxSub"></div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-label">Lowest</div>
+      <div class="stat-val" id="statMin">—</div>
+      <div class="stat-sub" id="statMinSub"></div>
+    </div>
+  </div>
 
-  // ── State ───────────────────────────────────────────────────────────────────
-  let geoData = null;
-  let overlayLayer = null;
-  let searchIndex = [...places];
-  let activeTab = 'explorer';
-  let overlayMode = 'population';
-  let selectedLayer = null;
-  // Cache for externally loaded datasets: overlayKey → {data, min, max, unit, source, ...}
-  const datasetCache = {};
+  <div id="legendWrap" style="display:none">
+    <div class="legend-label" id="legendLabel"></div>
+    <div class="legend-bar"   id="legendBar"></div>
+    <div class="legend-ticks">
+      <span id="legendMin"></span>
+      <span id="legendMid"></span>
+      <span id="legendMax"></span>
+    </div>
+  </div>
 
-  // ── Map setup ───────────────────────────────────────────────────────────────
-  const map = L.map('map', { zoomControl: true, minZoom: 2, maxZoom: 18, zoomSnap: 0.5 }).setView([20, 0], 2);
-  const baseLayers = {
-    'Modern Streets': L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors', maxZoom: 19,
-    }),
-    'Night Mode': L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://carto.com/">CARTO</a>', maxZoom: 19,
-    }),
-  };
-  baseLayers['Modern Streets'].addTo(map);
-  L.control.layers(baseLayers, null, { position: 'topright' }).addTo(map);
+  <div class="source-wrap" id="sourceWrap" style="display:none"></div>
+</aside>
 
-  // ── Color helpers ───────────────────────────────────────────────────────────
-  function lerp(a, b, t) { return a + (b - a) * t; }
-  function lerpColor(c1, c2, t) {
-    return `rgb(${Math.round(lerp(c1[0],c2[0],t))},${Math.round(lerp(c1[1],c2[1],t))},${Math.round(lerp(c1[2],c2[2],t))})`;
-  }
+<div id="country-panel">
+  <button class="cp-close" id="cpClose">✕</button>
+  <div class="cp-name"   id="cpName">—</div>
+  <div class="cp-metric" id="cpMetric">—</div>
+  <div class="cp-val"    id="cpVal">—</div>
+  <div class="cp-bar-bg"><div class="cp-bar" id="cpBar" style="width:0%"></div></div>
+  <div id="chartWrap"><canvas id="topChart"></canvas></div>
+  <div class="cp-src"    id="cpSrc"></div>
+</div>
 
-  function getOverlayColor(properties) {
-    const meta = OVERLAY_META[overlayMode];
-    const cached = datasetCache[overlayMode];
+<script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+// ── Constants ──────────────────────────────────────────────────────────────
+const ISO3_KEY = 'ISO3166-1-Alpha-3';
 
-    if (cached) {
-      const iso3 = properties['ISO3166-1-Alpha-3'] || '';
-      const val = cached.data[iso3];
-      if (val === undefined || val === null) return '#2a3547';
-      const t = cached.max > cached.min
-        ? Math.min(Math.max((val - cached.min) / (cached.max - cached.min), 0), 1)
-        : 0;
-      return lerpColor(meta.colorScale[0], meta.colorScale[1], t);
-    }
+const OVERLAY_META = {
+  // Explorer tab — values embedded in COUNTRY_DATA
+  population: {
+    label: 'Population', icon: '👥', unit: 'million people', prop: 'population',
+    source: 'World Bank', year: '2022', license: 'CC BY 4.0',
+    sourceUrl: 'https://data.worldbank.org/indicator/SP.POP.TOTL',
+    colorLow: [20,60,160], colorHigh: [255,200,50],
+    format: v => { v = +v; return v >= 1000 ? (v/1000).toFixed(1)+'B' : Math.round(v)+'M'; },
+  },
+  climate: {
+    label: 'Avg Temp', icon: '🌡️', unit: '°C', prop: 'climate',
+    source: 'World Bank Climate Data', year: '2022', license: 'CC BY 4.0',
+    sourceUrl: 'https://climateknowledgeportal.worldbank.org/',
+    colorLow: [50,120,210], colorHigh: [220,50,20],
+    format: v => Math.round(+v) + '°C',
+  },
+  gdp: {
+    label: 'GDP', icon: '💰', unit: 'billion USD', prop: 'gdp',
+    source: 'World Bank', year: '2022', license: 'CC BY 4.0',
+    sourceUrl: 'https://data.worldbank.org/indicator/NY.GDP.MKTP.CD',
+    colorLow: [20,80,150], colorHigh: [255,215,0],
+    format: v => { v = +v; return v >= 1000 ? '$'+(v/1000).toFixed(1)+'T' : '$'+Math.round(v)+'B'; },
+  },
+  // Climate tab — loaded from web/data/dashboards/climate/
+  temperature: {
+    label: 'Warming', icon: '🔥', unit: '°C anomaly', file: 'climate/temperature',
+    source: 'Our World in Data / Global Carbon Project', year: '2022', license: 'CC BY 4.0',
+    sourceUrl: 'https://github.com/owid/co2-data',
+    colorLow: [210,235,255], colorHigh: [200,30,30],
+    format: v => (+v).toFixed(2)+'°C',
+  },
+  co2: {
+    label: 'CO₂/capita', icon: '🏭', unit: 'tonnes/year', file: 'climate/co2',
+    source: 'Our World in Data / Global Carbon Project', year: '2022', license: 'CC BY 4.0',
+    sourceUrl: 'https://github.com/owid/co2-data',
+    colorLow: [255,245,220], colorHigh: [180,35,20],
+    format: v => (+v).toFixed(1)+'t',
+  },
+  renewable: {
+    label: 'Renewable %', icon: '⚡', unit: '% of energy', file: 'climate/renewable',
+    source: 'Our World in Data / IEA', year: '2022', license: 'CC BY 4.0',
+    sourceUrl: 'https://github.com/owid/energy-data',
+    colorLow: [220,255,225], colorHigh: [20,120,50],
+    format: v => (+v).toFixed(0)+'%',
+  },
+  // Health tab
+  vaccination: {
+    label: 'Vaccination', icon: '💉', unit: 'doses/100 people', file: 'health/vaccination',
+    source: 'World Bank / WHO', year: '2022', license: 'CC BY 4.0',
+    sourceUrl: 'https://data.worldbank.org/indicator/SH.IMM.MEAS',
+    colorLow: [255,240,220], colorHigh: [100,50,180],
+    format: v => (+v).toFixed(0),
+  },
+  life_expectancy: {
+    label: 'Life Exp.', icon: '❤️', unit: 'years', file: 'health/life_expectancy',
+    source: 'World Bank', year: '2022', license: 'CC BY 4.0',
+    sourceUrl: 'https://data.worldbank.org/indicator/SP.DYN.LE00.IN',
+    colorLow: [200,40,40], colorHigh: [50,160,100],
+    format: v => (+v).toFixed(0)+' yr',
+  },
+  healthcare: {
+    label: 'Health Spend', icon: '🏥', unit: 'USD/capita', file: 'health/healthcare',
+    source: 'World Bank / WHO', year: '2021', license: 'CC BY 4.0',
+    sourceUrl: 'https://data.worldbank.org/indicator/SH.XPD.CHEX.PC.CD',
+    colorLow: [220,240,255], colorHigh: [20,80,150],
+    format: v => '$'+(+v).toFixed(0),
+  },
+  // Humanitarian tab
+  poverty: {
+    label: 'Poverty', icon: '📉', unit: '% below $2.15/day', file: 'humanitarian/poverty',
+    source: 'World Bank', year: '2022', license: 'CC BY 4.0',
+    sourceUrl: 'https://data.worldbank.org/indicator/SI.POV.DDAY',
+    colorLow: [50,160,100], colorHigh: [200,30,30],
+    format: v => (+v).toFixed(1)+'%',
+  },
+  conflicts: {
+    label: 'Conflict Deaths', icon: '⚠️', unit: 'deaths/100k', file: 'humanitarian/conflicts',
+    source: 'World Bank / UCDP', year: '2022', license: 'CC BY 4.0',
+    sourceUrl: 'https://data.worldbank.org/indicator/VC.BTL.DETH',
+    colorLow: [255,245,230], colorHigh: [150,15,15],
+    format: v => (+v).toFixed(2),
+  },
+  refugees: {
+    label: 'Refugees', icon: '🤝', unit: 'total', file: 'humanitarian/refugees',
+    source: 'UNHCR', year: '2023', license: 'Open (UNHCR)',
+    sourceUrl: 'https://www.unhcr.org/refugee-statistics/',
+    colorLow: [255,245,225], colorHigh: [180,70,15],
+    format: v => +v >= 1e6 ? (+v/1e6).toFixed(1)+'M' : +v >= 1e3 ? (+v/1e3).toFixed(0)+'K' : String(+v),
+  },
+};
 
-    if (meta.file) return '#2a3547'; // external dataset, not yet loaded
+const TABS = {
+  explorer:     { overlays: ['population','climate','gdp'] },
+  climate:      { overlays: ['temperature','co2','renewable'] },
+  health:       { overlays: ['vaccination','life_expectancy','healthcare'] },
+  humanitarian: { overlays: ['poverty','conflicts','refugees'] },
+};
 
-    // Embedded explorer data
-    const v = properties[meta.prop] || 0;
-    if (overlayMode === 'population') return lerpColor([210,235,255],[20,80,180], Math.min(v/1450,1));
-    if (overlayMode === 'climate')    return lerpColor([100,210,200],[240,160,40], Math.min(Math.max((v+5)/37,0),1));
-    if (overlayMode === 'gdp')        return lerpColor([210,245,220],[20,130,70],  Math.min(v/25000,1));
-    return '#b0bec5';
-  }
+const COUNTRY_DATA = {
+  'CHN': { population: 1412, gdp: 17963, climate: 14 },
+  'IND': { population: 1408, gdp: 3550,  climate: 25 },
+  'USA': { population: 335,  gdp: 25440, climate: 12 },
+  'IDN': { population: 277,  gdp: 1319,  climate: 27 },
+  'PAK': { population: 231,  gdp: 376,   climate: 22 },
+  'BRA': { population: 215,  gdp: 1920,  climate: 25 },
+  'NGA': { population: 218,  gdp: 477,   climate: 28 },
+  'BGD': { population: 170,  gdp: 460,   climate: 26 },
+  'RUS': { population: 144,  gdp: 2245,  climate: 0  },
+  'ETH': { population: 123,  gdp: 111,   climate: 22 },
+  'MEX': { population: 128,  gdp: 1323,  climate: 21 },
+  'JPN': { population: 125,  gdp: 4231,  climate: 16 },
+  'PHL': { population: 115,  gdp: 404,   climate: 27 },
+  'EGY': { population: 105,  gdp: 476,   climate: 22 },
+  'COD': { population: 100,  gdp: 55,    climate: 24 },
+  'VNM': { population: 97,   gdp: 409,   climate: 27 },
+  'IRN': { population: 86,   gdp: 368,   climate: 18 },
+  'TUR': { population: 85,   gdp: 905,   climate: 14 },
+  'DEU': { population: 84,   gdp: 4074,  climate: 10 },
+  'THA': { population: 72,   gdp: 522,   climate: 28 },
+  'GBR': { population: 67,   gdp: 3070,  climate: 11 },
+  'TZA': { population: 64,   gdp: 76,    climate: 23 },
+  'FRA': { population: 68,   gdp: 2782,  climate: 13 },
+  'ZAF': { population: 60,   gdp: 405,   climate: 17 },
+  'MMR': { population: 55,   gdp: 65,    climate: 27 },
+  'KEN': { population: 55,   gdp: 107,   climate: 22 },
+  'KOR': { population: 52,   gdp: 1665,  climate: 13 },
+  'COL': { population: 51,   gdp: 344,   climate: 24 },
+  'ESP': { population: 47,   gdp: 1418,  climate: 16 },
+  'UGA': { population: 47,   gdp: 42,    climate: 23 },
+  'ARG': { population: 46,   gdp: 632,   climate: 16 },
+  'DZA': { population: 45,   gdp: 191,   climate: 12 },
+  'SDN': { population: 45,   gdp: 33,    climate: 25 },
+  'IRQ': { population: 42,   gdp: 264,   climate: 23 },
+  'UKR': { population: 44,   gdp: 160,   climate: 9  },
+  'CAN': { population: 38,   gdp: 2139,  climate: 0  },
+  'MAR': { population: 37,   gdp: 142,   climate: 18 },
+  'SAU': { population: 36,   gdp: 1109,  climate: 26 },
+  'POL': { population: 38,   gdp: 696,   climate: 9  },
+  'MYS': { population: 33,   gdp: 407,   climate: 27 },
+  'MOZ': { population: 32,   gdp: 18,    climate: 23 },
+  'GHA': { population: 32,   gdp: 77,    climate: 27 },
+  'PER': { population: 33,   gdp: 242,   climate: 19 },
+  'AGO': { population: 34,   gdp: 95,    climate: 22 },
+  'AFG': { population: 41,   gdp: 20,    climate: 12 },
+  'VEN': { population: 29,   gdp: 105,   climate: 28 },
+  'MDG': { population: 28,   gdp: 14,    climate: 22 },
+  'CMR': { population: 27,   gdp: 44,    climate: 25 },
+  'CIV': { population: 26,   gdp: 70,    climate: 27 },
+  'NER': { population: 25,   gdp: 15,    climate: 29 },
+  'AUS': { population: 26,   gdp: 1675,  climate: 22 },
+  'ROU': { population: 19,   gdp: 301,   climate: 10 },
+  'NLD': { population: 18,   gdp: 1013,  climate: 11 },
+  'BEL': { population: 11,   gdp: 593,   climate: 11 },
+  'CHE': { population: 9,    gdp: 807,   climate: 9  },
+  'SWE': { population: 10,   gdp: 585,   climate: 6  },
+  'NOR': { population: 5,    gdp: 579,   climate: 4  },
+  'ITA': { population: 60,   gdp: 2011,  climate: 15 },
+  'ARE': { population: 10,   gdp: 507,   climate: 28 },
+  'ISR': { population: 9,    gdp: 522,   climate: 21 },
+  'SGP': { population: 6,    gdp: 397,   climate: 28 },
+  'NZL': { population: 5,    gdp: 245,   climate: 14 },
+  'CHL': { population: 19,   gdp: 301,   climate: 12 },
+  'PRT': { population: 10,   gdp: 254,   climate: 17 },
+  'GRC': { population: 11,   gdp: 219,   climate: 18 },
+  'CZE': { population: 11,   gdp: 290,   climate: 9  },
+  'HUN': { population: 10,   gdp: 179,   climate: 11 },
+  'AUT': { population: 9,    gdp: 471,   climate: 9  },
+  'DNK': { population: 6,    gdp: 395,   climate: 9  },
+  'FIN': { population: 6,    gdp: 283,   climate: 4  },
+  'TWN': { population: 23,   gdp: 790,   climate: 24 },
+  'LKA': { population: 22,   gdp: 83,    climate: 28 },
+  'SYR': { population: 21,   gdp: 23,    climate: 18 },
+  'KAZ': { population: 19,   gdp: 225,   climate: 8  },
+  'MLI': { population: 22,   gdp: 19,    climate: 29 },
+  'BFA': { population: 22,   gdp: 19,    climate: 29 },
+  'MWI': { population: 20,   gdp: 13,    climate: 23 },
+  'ZMB': { population: 19,   gdp: 28,    climate: 20 },
+  'ZWE': { population: 16,   gdp: 26,    climate: 21 },
+  'ECU': { population: 18,   gdp: 115,   climate: 22 },
+  'GTM': { population: 17,   gdp: 85,    climate: 24 },
+  'SOM': { population: 17,   gdp: 9,     climate: 28 },
+  'CUB': { population: 11,   gdp: 107,   climate: 26 },
+  'BOL': { population: 12,   gdp: 44,    climate: 18 },
+  'HTI': { population: 12,   gdp: 20,    climate: 28 },
+  'BLR': { population: 10,   gdp: 73,    climate: 8  },
+  'PRY': { population: 7,    gdp: 40,    climate: 24 },
+  'HND': { population: 10,   gdp: 31,    climate: 25 },
+  'SVN': { population: 2,    gdp: 62,    climate: 11 },
+  'LBY': { population: 7,    gdp: 46,    climate: 20 },
+  'TUN': { population: 12,   gdp: 46,    climate: 19 },
+  'SEN': { population: 17,   gdp: 28,    climate: 28 },
+  'TCD': { population: 17,   gdp: 12,    climate: 27 },
+  'GIN': { population: 13,   gdp: 16,    climate: 27 },
+  'RWA': { population: 14,   gdp: 11,    climate: 21 },
+  'BEN': { population: 13,   gdp: 17,    climate: 28 },
+  'TJK': { population: 10,   gdp: 10,    climate: 11 },
+  'AZE': { population: 10,   gdp: 78,    climate: 15 },
+  'HRV': { population: 4,    gdp: 71,    climate: 13 },
+  'BGR': { population: 7,    gdp: 87,    climate: 12 },
+  'SRB': { population: 7,    gdp: 63,    climate: 12 },
+  'SVK': { population: 6,    gdp: 118,   climate: 10 },
+  'LTU': { population: 3,    gdp: 70,    climate: 8  },
+  'LVA': { population: 2,    gdp: 42,    climate: 7  },
+  'EST': { population: 1,    gdp: 38,    climate: 7  },
+  'QAT': { population: 3,    gdp: 236,   climate: 29 },
+  'KWT': { population: 4,    gdp: 184,   climate: 28 },
+  'OMN': { population: 5,    gdp: 104,   climate: 28 },
+  'BHR': { population: 2,    gdp: 44,    climate: 28 },
+  'JOR': { population: 10,   gdp: 46,    climate: 18 },
+  'LBN': { population: 5,    gdp: 23,    climate: 20 },
+  'HKG': { population: 7,    gdp: 369,   climate: 24 },
+  'MNG': { population: 3,    gdp: 17,    climate: 1  },
+  'PNG': { population: 10,   gdp: 30,    climate: 26 },
+  'FJI': { population: 1,    gdp: 4,     climate: 26 },
+};
 
-  function styleFeature(f) {
-    return { fillColor: getOverlayColor(f.properties), color: 'rgba(255,255,255,0.18)', weight: 0.7, fillOpacity: 0.55 };
-  }
+// ── State ─────────────────────────────────────────────────────────────────
+const isoToId   = {};   // ISO3 → MapLibre feature id (integer)
+const isoToName = {};   // ISO3 → country name
+const isoToBounds = {}; // ISO3 → [[minLng,minLat],[maxLng,maxLat]]
+const dataCache = {};   // overlay key → {data, min, max, unit, source, ...}
+let activeOverlay = 'population';
+let selectedIso   = null;
+let hoveredId     = null;
+let topChart      = null;
 
-  // ── Number formatting ───────────────────────────────────────────────────────
-  function fmtNum(n) {
-    if (n === null || n === undefined || isNaN(n)) return '—';
-    if (Math.abs(n) >= 1e9) return (n/1e9).toFixed(1) + 'B';
-    if (Math.abs(n) >= 1e6) return (n/1e6).toFixed(1) + 'M';
-    if (Math.abs(n) >= 1e3) return (n/1e3).toFixed(1) + 'K';
-    return n % 1 === 0 ? String(n) : n.toFixed(2);
-  }
+// ── Map ───────────────────────────────────────────────────────────────────
+const map = new maplibregl.Map({
+  container: 'map',
+  style: 'https://tiles.openfreemap.org/styles/dark',
+  center: [15, 20], zoom: 1.5, minZoom: 1,
+  attributionControl: false,
+});
+map.addControl(new maplibregl.AttributionControl({compact: true}), 'bottom-right');
+map.addControl(new maplibregl.NavigationControl({showCompass: false}), 'bottom-right');
 
-  function formatValue(properties) {
-    const meta = OVERLAY_META[overlayMode];
-    const cached = datasetCache[overlayMode];
-    if (cached) {
-      const iso3 = properties['ISO3166-1-Alpha-3'] || '';
-      const v = cached.data[iso3];
-      return v !== undefined ? `${fmtNum(v)} ${cached.unit}` : 'No data';
-    }
-    if (meta.file) return '—';
-    const v = properties[meta.prop];
-    return v !== undefined ? `${v} ${meta.unitSuffix}` : '—';
-  }
-
-  // ── Source attribution HTML ─────────────────────────────────────────────────
-  function sourceHtml(meta) {
-    const cached = datasetCache[overlayMode];
-    const src    = cached ? cached.source     : meta.source;
-    const url    = cached ? cached.sourceUrl  : meta.sourceUrl;
-    const lic    = cached ? cached.license    : meta.license;
-    const yr     = cached ? cached.year       : meta.year;
-    return `Data: <a href="${url}" target="_blank" rel="noopener">${src}</a> (${yr}) &middot; ${lic}`;
-  }
-
-  // ── Popup content ───────────────────────────────────────────────────────────
-  function popupHtml(name, properties) {
-    const meta = OVERLAY_META[overlayMode];
-    return `<p><strong>${name}</strong></p>
-            <p>${meta.label}: ${formatValue(properties)}</p>
-            <p class="popup-source">${sourceHtml(meta)}</p>`;
-  }
-
-  // ── Feature interaction ─────────────────────────────────────────────────────
-  function highlightFeature(layer) {
-    layer.setStyle({ weight: 2.7, color: '#ffffff', fillOpacity: 0.92 });
-    if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) layer.bringToFront();
-  }
-
-  function resetHighlight(layer) {
-    if (selectedLayer === layer) {
-      layer.setStyle({ weight: 2.7, color: '#ffffff', fillOpacity: 0.92 });
-    } else if (overlayLayer) {
-      overlayLayer.resetStyle(layer);
-    }
-  }
-
-  function selectFeature(feature, layer) {
-    if (selectedLayer) overlayLayer.resetStyle(selectedLayer);
-    selectedLayer = layer;
-    layer.setStyle({ weight: 2.7, color: '#ffffff', fillOpacity: 0.92 });
-    updateInfoPanel(feature.properties.name, feature.properties);
-    layer.openPopup();
-  }
-
-  function onEachFeature(feature, layer) {
-    layer.on({
-      mouseover: () => highlightFeature(layer),
-      mouseout:  () => resetHighlight(layer),
-      click:     () => selectFeature(feature, layer),
+map.on('style.load', async () => {
+  try { map.setProjection({type: 'globe'}); } catch (_) {}
+  try {
+    map.setFog({
+      color: 'rgba(2,4,14,0.8)',
+      'high-color': '#000820',
+      'horizon-blend': 0.06,
+      'space-color': '#000000',
+      'star-intensity': 0.15,
     });
-    layer.bindPopup(() => popupHtml(feature.properties.name, feature.properties));
-    layer.bindTooltip(feature.properties.name, { direction: 'center', permanent: false });
-  }
+  } catch (_) {}
+  await loadGeoJSON();
+  hideLoading();
+  switchTab('explorer');
+});
 
-  // ── Info panel ──────────────────────────────────────────────────────────────
-  function updateInfoPanel(name, properties) {
-    const meta = OVERLAY_META[overlayMode];
-    document.getElementById('selectedValue').textContent = formatValue(properties);
-    document.getElementById('infoTitle').textContent = name;
-    document.getElementById('infoPopulation').textContent =
-      `Population: ${properties.population !== undefined ? properties.population + ' M' : '—'}`;
-    document.getElementById('infoClimate').textContent =
-      `Avg temp: ${properties.climate !== undefined ? properties.climate + ' °C' : '—'}`;
-    document.getElementById('infoGdp').textContent =
-      `GDP: ${properties.gdp !== undefined ? '$' + properties.gdp + ' B' : '—'}`;
-    const src = document.getElementById('infoSource');
-    src.style.display = 'block';
-    src.innerHTML = sourceHtml(meta);
-  }
+// ── GeoJSON ───────────────────────────────────────────────────────────────
+async function loadGeoJSON() {
+  const resp    = await fetch('data/countries.geojson');
+  const geojson = await resp.json();
 
-  // ── Legend ──────────────────────────────────────────────────────────────────
-  function updateLegend() {
-    const legend = document.getElementById('legend');
-    const credit = document.getElementById('sourceCredit');
-    const notice = document.getElementById('pendingNotice');
-    const meta   = OVERLAY_META[overlayMode];
-    const cached = datasetCache[overlayMode];
-
-    legend.innerHTML = '';
-    credit.style.display = 'block';
-    credit.innerHTML = sourceHtml(meta);
-
-    if (cached) {
-      const { min, max } = cached;
-      const sc = meta.colorScale;
-      [
-        { t: 1,   label: `${fmtNum(max)} (high)` },
-        { t: 0.5, label: `${fmtNum((min+max)/2)} (mid)` },
-        { t: 0,   label: `${fmtNum(min)} (low)` },
-      ].forEach(({ t, label }) => {
-        const div = document.createElement('div');
-        div.className = 'legend-item';
-        div.innerHTML = `<span class="legend-swatch" style="background:${lerpColor(sc[0],sc[1],t)}"></span>${label}`;
-        legend.appendChild(div);
-      });
-      notice.style.display = 'none';
-      return;
+  geojson.features.forEach((f, i) => {
+    const iso3 = f.properties[ISO3_KEY];
+    const name = f.properties.name || '';
+    if (!iso3) return;
+    isoToId[iso3]   = i;
+    isoToName[iso3] = name;
+    const pts = flatCoords(f.geometry);
+    if (pts.length) {
+      const lngs = pts.map(c => c[0]), lats = pts.map(c => c[1]);
+      isoToBounds[iso3] = [
+        [Math.min(...lngs), Math.min(...lats)],
+        [Math.max(...lngs), Math.max(...lats)],
+      ];
     }
+  });
 
-    if (meta.file) {
-      const div = document.createElement('div');
-      div.className = 'legend-item';
-      div.innerHTML = `<span class="legend-swatch" style="background:#2a3547"></span>Dataset not yet loaded`;
-      legend.appendChild(div);
-      notice.style.display = 'block';
-      return;
-    }
+  map.addSource('countries', {type: 'geojson', data: geojson, generateId: true});
 
-    notice.style.display = 'none';
+  map.addLayer({
+    id: 'countries-fill', type: 'fill', source: 'countries',
+    paint: {'fill-color': 'rgba(255,255,255,0.04)', 'fill-opacity': 0.9},
+  });
+  map.addLayer({
+    id: 'countries-hover', type: 'fill', source: 'countries',
+    paint: {
+      'fill-color': 'rgba(255,255,255,0.10)',
+      'fill-opacity': ['case', ['boolean', ['feature-state','hover'],  false], 1, 0],
+    },
+  });
+  map.addLayer({
+    id: 'countries-line', type: 'line', source: 'countries',
+    paint: {
+      'line-color': ['case',
+        ['boolean', ['feature-state','selected'], false], 'rgba(255,255,255,0.85)',
+        'rgba(255,255,255,0.11)',
+      ],
+      'line-width': ['case',
+        ['boolean', ['feature-state','selected'], false], 2, 0.5,
+      ],
+    },
+  });
 
-    // Embedded explorer stops
-    const stops = overlayMode === 'population'
-      ? [['rgb(20,80,180)','1B+ people'],['rgb(110,155,215)','~300M'],['rgb(210,235,255)','<50M']]
-      : overlayMode === 'climate'
-        ? [['rgb(240,160,40)','Hot >25°C'],['rgb(170,185,120)','Warm ~15°C'],['rgb(100,210,200)','Cool <5°C']]
-        : [['rgb(20,130,70)','>$10T'],['rgb(115,188,145)','~$1T'],['rgb(210,245,220)','<$100B']];
-    stops.forEach(([color, label]) => {
-      const div = document.createElement('div');
-      div.className = 'legend-item';
-      div.innerHTML = `<span class="legend-swatch" style="background:${color}"></span>${label}`;
-      legend.appendChild(div);
+  map.on('mousemove',  'countries-fill', onHover);
+  map.on('mouseleave', 'countries-fill', onLeave);
+  map.on('click',      'countries-fill', onCountryClick);
+}
+
+function flatCoords(geo) {
+  if (!geo) return [];
+  if (geo.type === 'Polygon')      return geo.coordinates[0] || [];
+  if (geo.type === 'MultiPolygon') return (geo.coordinates || []).flatMap(p => p[0] || []);
+  return [];
+}
+
+// ── Hover / click ─────────────────────────────────────────────────────────
+function onHover(e) {
+  map.getCanvas().style.cursor = 'pointer';
+  const id = e.features[0].id;
+  if (hoveredId !== null && hoveredId !== id)
+    map.setFeatureState({source:'countries', id: hoveredId}, {hover: false});
+  hoveredId = id;
+  map.setFeatureState({source:'countries', id}, {hover: true});
+}
+
+function onLeave() {
+  map.getCanvas().style.cursor = '';
+  if (hoveredId !== null) {
+    map.setFeatureState({source:'countries', id: hoveredId}, {hover: false});
+    hoveredId = null;
+  }
+}
+
+function onCountryClick(e) {
+  const f    = e.features[0];
+  const iso3 = f.properties[ISO3_KEY];
+  if (selectedIso && isoToId[selectedIso] !== undefined)
+    map.setFeatureState({source:'countries', id: isoToId[selectedIso]}, {selected: false});
+  selectedIso = iso3 || null;
+  if (iso3 && isoToId[iso3] !== undefined)
+    map.setFeatureState({source:'countries', id: isoToId[iso3]}, {selected: true});
+  showCountryPanel(iso3);
+}
+
+// ── Tab switching ─────────────────────────────────────────────────────────
+function switchTab(tab) {
+  document.querySelectorAll('.tab-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.tab === tab));
+
+  const grid = document.getElementById('overlayGrid');
+  grid.innerHTML = '';
+  TABS[tab].overlays.forEach(key => {
+    const m   = OVERLAY_META[key];
+    const btn = document.createElement('button');
+    btn.className = 'overlay-btn';
+    btn.dataset.overlay = key;
+    btn.innerHTML = `<span class="icon">${m.icon}</span>${m.label}`;
+    btn.addEventListener('click', () => activateOverlay(key));
+    grid.appendChild(btn);
+  });
+
+  activateOverlay(TABS[tab].overlays[0]);
+}
+
+// ── Overlay activation ────────────────────────────────────────────────────
+async function activateOverlay(key) {
+  activeOverlay = key;
+  const m = OVERLAY_META[key];
+
+  document.querySelectorAll('.overlay-btn').forEach(b =>
+    b.classList.toggle('active', b.dataset.overlay === key));
+
+  // Gather data
+  let data = {};
+  if (m.prop) {
+    Object.entries(COUNTRY_DATA).forEach(([iso3, d]) => {
+      if (d[m.prop] !== undefined) data[iso3] = d[m.prop];
     });
-  }
-
-  // ── Top 3 list ──────────────────────────────────────────────────────────────
-  function updateTopMetrics() {
-    if (!geoData) return;
-    const meta   = OVERLAY_META[overlayMode];
-    const cached = datasetCache[overlayMode];
-    document.getElementById('regionCount').textContent = geoData.features.length;
-    document.getElementById('currentMode').textContent  = meta.label;
-    document.getElementById('topListTitle').textContent = `Top 3 — ${meta.label}`;
-
-    if (cached) {
-      const ranked = geoData.features
-        .map(f => ({ name: f.properties.name, val: cached.data[f.properties['ISO3166-1-Alpha-3']] }))
-        .filter(x => x.val !== undefined && x.val !== null)
-        .sort((a, b) => b.val - a.val);
-      if (!ranked.length) {
-        document.getElementById('averageValue').textContent = '—';
-        document.getElementById('topList').innerHTML = '<div class="top-item" style="color:var(--muted)">No data</div>';
+  } else {
+    if (!dataCache[key]) {
+      try {
+        const r = await fetch(`data/dashboards/${m.file}.json`);
+        if (!r.ok) throw new Error();
+        const j = await r.json();
+        const nums = Object.values(j.data).filter(v => v !== null && !isNaN(+v)).map(Number);
+        if (!nums.length) throw new Error();
+        dataCache[key] = {
+          data: j.data, min: Math.min(...nums), max: Math.max(...nums),
+          unit: j.unit || '', source: j.source || m.source,
+          sourceUrl: j.url || m.sourceUrl, license: j.license || m.license,
+          year: j.year || m.year,
+        };
+      } catch {
+        showPending(m);
         return;
       }
-      const avg = ranked.reduce((s, x) => s + x.val, 0) / ranked.length;
-      document.getElementById('averageValue').textContent = `${fmtNum(avg)} ${cached.unit}`;
-      document.getElementById('topList').innerHTML = ranked.slice(0, 3).map(x =>
-        `<div class="top-item"><div>${x.name}</div><strong>${fmtNum(x.val)} ${cached.unit}</strong></div>`
-      ).join('');
-      return;
     }
-
-    if (meta.file) {
-      document.getElementById('averageValue').textContent = '—';
-      document.getElementById('topList').innerHTML = '<div class="top-item" style="color:var(--muted)">No data loaded yet</div>';
-      return;
-    }
-
-    // Embedded data
-    const sorted = geoData.features.slice().sort((a, b) => b.properties[meta.prop] - a.properties[meta.prop]);
-    const avg = sorted.reduce((s, f) => s + f.properties[meta.prop], 0) / sorted.length;
-    document.getElementById('averageValue').textContent = `${Math.round(avg)} ${meta.unitSuffix}`;
-    document.getElementById('topList').innerHTML = sorted.slice(0, 3).map(f =>
-      `<div class="top-item"><div>${f.properties.name}</div><strong>${f.properties[meta.prop]} ${meta.unitSuffix}</strong></div>`
-    ).join('');
+    data = dataCache[key].data;
   }
 
-  // ── Dataset loader ──────────────────────────────────────────────────────────
-  async function loadDataset(key) {
-    if (datasetCache[key]) return true;
-    const meta = OVERLAY_META[key];
-    if (!meta.file) return true; // embedded
-    try {
-      const resp = await fetch(`./data/dashboards/${meta.file}.json`);
-      if (!resp.ok) return false;
-      const json = await resp.json();
-      const vals = Object.values(json.data).filter(v => v !== null && !isNaN(Number(v))).map(Number);
-      if (!vals.length) return false;
-      datasetCache[key] = {
-        data:      json.data,
-        min:       Math.min(...vals),
-        max:       Math.max(...vals),
-        unit:      json.unit || meta.unitSuffix || '',
-        source:    json.source || meta.source,
-        sourceUrl: json.url    || meta.sourceUrl,
-        license:   json.license || meta.license,
-        year:      json.year   || meta.year,
-      };
-      return true;
-    } catch {
-      return false;
-    }
-  }
+  // Stats
+  const nums    = Object.values(data).filter(v => v !== null && !isNaN(+v)).map(Number);
+  if (!nums.length) { showPending(m); return; }
+  const minVal  = Math.min(...nums);
+  const maxVal  = Math.max(...nums);
+  const avgVal  = nums.reduce((a, b) => a + b, 0) / nums.length;
 
-  // ── Overlay activation ──────────────────────────────────────────────────────
-  async function activateOverlay(key) {
-    overlayMode = key;
-    renderOverlayButtons(); // show loading state immediately
-    document.getElementById('statusTag').textContent = 'Loading…';
+  // Apply feature states (-1 = no data sentinel)
+  Object.values(isoToId).forEach(id =>
+    map.setFeatureState({source:'countries', id}, {value: -1}));
+  Object.entries(data).forEach(([iso3, v]) => {
+    const id = isoToId[iso3];
+    if (id !== undefined && v !== null && !isNaN(+v))
+      map.setFeatureState({source:'countries', id}, {value: +v});
+  });
 
-    await loadDataset(key);
+  // Paint expression
+  const low  = `rgb(${m.colorLow.join(',')})`;
+  const high = `rgb(${m.colorHigh.join(',')})`;
+  map.setPaintProperty('countries-fill', 'fill-color', [
+    'case',
+    ['<=', ['coalesce', ['feature-state','value'], -1], -1],
+    'rgba(255,255,255,0.04)',
+    ['interpolate', ['linear'], ['coalesce', ['feature-state','value'], minVal],
+      minVal, low, maxVal, high],
+  ]);
 
-    if (overlayLayer) {
-      overlayLayer.setStyle(styleFeature);
-      overlayLayer.eachLayer(l => {
-        l.setPopupContent(popupHtml(l.feature.properties.name, l.feature.properties));
-      });
-    }
-    document.getElementById('statusTag').textContent = OVERLAY_META[key].label;
-    if (selectedLayer) updateInfoPanel(selectedLayer.feature.properties.name, selectedLayer.feature.properties);
-    renderOverlayButtons();
-    updateLegend();
-    updateTopMetrics();
-  }
+  updateLegend(m, minVal, maxVal, low, high);
+  updateStats(nums.length, avgVal, data, m);
+  updateSource(m, key);
 
-  // ── Toolbar rendering ───────────────────────────────────────────────────────
-  function renderOverlayButtons() {
-    const toolbar = document.getElementById('overlayToolbar');
-    toolbar.innerHTML = '';
-    TABS[activeTab].overlays.forEach(key => {
-      const meta   = OVERLAY_META[key];
-      const loaded = !meta.file || !!datasetCache[key];
-      const btn    = document.createElement('button');
-      btn.dataset.mode = key;
-      if (key === overlayMode) btn.classList.add('active');
-      if (!loaded) btn.classList.add('pending');
-      btn.innerHTML = loaded
-        ? meta.label
-        : `${meta.label}<span class="tag">run fetch_data.py</span>`;
-      btn.addEventListener('click', () => activateOverlay(key));
-      toolbar.appendChild(btn);
+  if (selectedIso) showCountryPanel(selectedIso);
+}
+
+// ── Legend ────────────────────────────────────────────────────────────────
+function updateLegend(m, minVal, maxVal, low, high) {
+  document.getElementById('legendWrap').style.display = '';
+  document.getElementById('legendLabel').textContent = `${m.label} · ${m.unit}`;
+  document.getElementById('legendBar').style.background = `linear-gradient(90deg,${low},${high})`;
+  document.getElementById('legendMin').textContent = m.format(minVal);
+  document.getElementById('legendMid').textContent = m.format((minVal + maxVal) / 2);
+  document.getElementById('legendMax').textContent = m.format(maxVal);
+}
+
+// ── Stats ─────────────────────────────────────────────────────────────────
+function updateStats(count, avg, data, m) {
+  animateCounter('statCountries', count);
+  fadeTo('statAvg', m.format(avg), '');
+
+  const pairs = Object.entries(data)
+    .filter(([, v]) => v !== null && !isNaN(+v) && +v >= 0)
+    .map(([k, v]) => [k, +v]);
+  pairs.sort((a, b) => b[1] - a[1]);
+
+  const top = pairs[0], bot = pairs[pairs.length - 1];
+  fadeTo('statMax', top ? m.format(top[1]) : '—', top ? (isoToName[top[0]] || top[0]) : '');
+  fadeTo('statMin', bot ? m.format(bot[1]) : '—', bot ? (isoToName[bot[0]] || bot[0]) : '');
+}
+
+// ── Source ────────────────────────────────────────────────────────────────
+function updateSource(m, key) {
+  const c   = dataCache[key];
+  const src = document.getElementById('sourceWrap');
+  src.style.display = '';
+  src.innerHTML = `<strong style="color:var(--text)">${c ? c.source : m.source}</strong>
+    &nbsp;·&nbsp;${c ? c.year : m.year}&nbsp;·&nbsp;${c ? c.license : m.license}<br>
+    <a href="${c ? c.sourceUrl : m.sourceUrl}" target="_blank" rel="noopener">View source →</a>`;
+}
+
+function showPending(m) {
+  document.getElementById('legendWrap').style.display = 'none';
+  const src = document.getElementById('sourceWrap');
+  src.style.display = '';
+  src.innerHTML = `<span style="color:var(--warning)">⚠️ Dataset pending.</span><br>
+    Run <code>python3 scripts/fetch_data.py</code> then refresh.`;
+}
+
+// ── Country panel ─────────────────────────────────────────────────────────
+function showCountryPanel(iso3) {
+  if (!iso3) return;
+  const m    = OVERLAY_META[activeOverlay];
+  const name = isoToName[iso3] || iso3;
+  const c    = dataCache[activeOverlay];
+
+  let val = null;
+  if (m.prop && COUNTRY_DATA[iso3] !== undefined)
+    val = COUNTRY_DATA[iso3][m.prop];
+  else if (c && c.data[iso3] !== undefined)
+    val = c.data[iso3];
+
+  const allData = m.prop
+    ? Object.fromEntries(Object.entries(COUNTRY_DATA).map(([k, d]) => [k, d[m.prop]]).filter(([,v]) => v !== undefined))
+    : (c ? c.data : {});
+  const allNums = Object.values(allData).filter(v => v !== null && !isNaN(+v)).map(Number);
+  const maxAll  = allNums.length ? Math.max(...allNums) : 1;
+
+  document.getElementById('cpName').textContent   = name;
+  document.getElementById('cpMetric').textContent = `${m.label} · ${m.unit}`;
+  document.getElementById('cpVal').textContent    = (val !== null && val !== undefined) ? m.format(+val) : 'No data';
+  document.getElementById('cpBar').style.width    = (val !== null && maxAll > 0)
+    ? Math.min((+val / maxAll) * 100, 100) + '%' : '0%';
+  document.getElementById('cpSrc').textContent    = `${c ? c.source : m.source} · ${c ? c.year : m.year} · ${c ? c.license : m.license}`;
+
+  renderTopChart(allData, m);
+
+  const panel = document.getElementById('country-panel');
+  panel.classList.remove('open');
+  void panel.offsetWidth;
+  panel.classList.add('open');
+}
+
+// ── Chart ─────────────────────────────────────────────────────────────────
+function renderTopChart(data, m) {
+  const top = Object.entries(data)
+    .filter(([, v]) => v !== null && !isNaN(+v))
+    .sort((a, b) => +b[1] - +a[1])
+    .slice(0, 10);
+
+  const n      = top.length || 1;
+  const labels = top.map(([k])    => isoToName[k] || k);
+  const values = top.map(([, v])  => +v);
+  const colors = top.map((_, i)   => {
+    const t = n > 1 ? i / (n - 1) : 0;
+    return `rgba(${lrp(m.colorLow[0],m.colorHigh[0],t)},${lrp(m.colorLow[1],m.colorHigh[1],t)},${lrp(m.colorLow[2],m.colorHigh[2],t)},0.85)`;
+  });
+
+  if (topChart) topChart.destroy();
+  topChart = new Chart(document.getElementById('topChart'), {
+    type: 'bar',
+    data: {labels, datasets: [{data: values, backgroundColor: colors, borderRadius: 4, borderSkipped: false}]},
+    options: {
+      indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+      animation: {duration: 550},
+      plugins: {
+        legend: {display: false},
+        tooltip: {
+          backgroundColor: 'rgba(8,12,28,.95)',
+          titleColor: '#e8f0ff', bodyColor: '#6b85b0',
+          borderColor: 'rgba(255,255,255,.07)', borderWidth: 1,
+          callbacks: {label: ctx => m.format(ctx.raw)},
+        },
+      },
+      scales: {
+        x: {display: false},
+        y: {
+          grid: {display: false}, border: {display: false},
+          ticks: {color: '#5a7498', font: {size: 10}},
+        },
+      },
+    },
+  });
+}
+
+// ── Helpers ───────────────────────────────────────────────────────────────
+function lrp(a, b, t) { return Math.round(a + (b - a) * Math.max(0, Math.min(1, t))); }
+
+function animateCounter(id, target) {
+  const el    = document.getElementById(id);
+  const start = parseInt(el.textContent) || 0;
+  const t0    = performance.now();
+  (function tick(now) {
+    const p    = Math.min((now - t0) / 500, 1);
+    const ease = 1 - (1 - p) ** 3;
+    el.textContent = Math.round(start + (target - start) * ease);
+    if (p < 1) requestAnimationFrame(tick);
+  })(performance.now());
+}
+
+function fadeTo(id, val, sub) {
+  const el  = document.getElementById(id);
+  const sub_el = document.getElementById(id + 'Sub');
+  el.style.opacity = '0';
+  setTimeout(() => {
+    el.textContent = val;
+    if (sub_el) sub_el.textContent = sub;
+    el.style.transition = 'opacity .28s';
+    el.style.opacity = '1';
+  }, 140);
+}
+
+function hideLoading() {
+  const el = document.getElementById('loading');
+  el.classList.add('fade-out');
+  setTimeout(() => el.remove(), 600);
+}
+
+// ── Search ────────────────────────────────────────────────────────────────
+const $search = document.getElementById('searchInput');
+const $sug    = document.getElementById('suggestions');
+
+$search.addEventListener('input', function () {
+  const q = this.value.trim().toLowerCase();
+  if (!q) { $sug.classList.remove('open'); return; }
+  const hits = Object.entries(isoToName)
+    .filter(([, n]) => n.toLowerCase().includes(q))
+    .slice(0, 8);
+  if (!hits.length) { $sug.classList.remove('open'); return; }
+  $sug.innerHTML = hits.map(([iso3, name]) =>
+    `<div class="sug-item" data-iso="${iso3}">${name}</div>`).join('');
+  $sug.classList.add('open');
+});
+
+$sug.addEventListener('click', e => {
+  const item = e.target.closest('.sug-item');
+  if (!item) return;
+  const iso3 = item.dataset.iso;
+  $search.value = isoToName[iso3] || '';
+  $sug.classList.remove('open');
+  if (isoToBounds[iso3])
+    map.fitBounds(isoToBounds[iso3], {
+      padding: {top: 80, bottom: 80, left: Number(getComputedStyle(document.documentElement).getPropertyValue('--sidebar-w').replace('px','')) + 20 || 400, right: 60},
+      maxZoom: 6, duration: 1200,
     });
+  // Select
+  if (isoToId[iso3] !== undefined) {
+    if (selectedIso && isoToId[selectedIso] !== undefined)
+      map.setFeatureState({source:'countries', id: isoToId[selectedIso]}, {selected: false});
+    selectedIso = iso3;
+    map.setFeatureState({source:'countries', id: isoToId[iso3]}, {selected: true});
+    showCountryPanel(iso3);
   }
+});
 
-  // ── Tab switching ───────────────────────────────────────────────────────────
-  function switchTab(tab) {
-    activeTab = tab;
-    document.querySelectorAll('.tab-btn').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
-    document.getElementById('tabSubtitle').textContent = TABS[tab].subtitle;
-    // Default to first overlay of this tab
-    activateOverlay(TABS[tab].overlays[0]);
-  }
+document.addEventListener('click', e => {
+  if (!e.target.closest('.search-wrap')) $sug.classList.remove('open');
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { $search.value = ''; $sug.classList.remove('open'); $search.blur(); }
+  if (e.key === '/' && document.activeElement !== $search) { e.preventDefault(); $search.focus(); }
+});
 
-  document.getElementById('tabNav').addEventListener('click', e => {
-    const btn = e.target.closest('.tab-btn');
-    if (btn) switchTab(btn.dataset.tab);
-  });
+// ── Country panel close ───────────────────────────────────────────────────
+document.getElementById('cpClose').addEventListener('click', () => {
+  document.getElementById('country-panel').classList.remove('open');
+  if (selectedIso && isoToId[selectedIso] !== undefined)
+    map.setFeatureState({source:'countries', id: isoToId[selectedIso]}, {selected: false});
+  selectedIso = null;
+});
 
-  // ── Geo data enrichment ─────────────────────────────────────────────────────
-  function hashString(v) {
-    let h = 0;
-    for (let i = 0; i < v.length; i++) { h = ((h << 5) - h) + v.charCodeAt(i); h |= 0; }
-    return Math.abs(h);
-  }
-
-  function getFeatureCentroid(feature) {
-    let lnSum = 0, ltSum = 0, n = 0;
-    function acc(c) {
-      if (typeof c[0] === 'number') { lnSum += c[0]; ltSum += c[1]; n++; } else c.forEach(acc);
-    }
-    acc(feature.geometry.coordinates);
-    return n ? [lnSum/n, ltSum/n] : [0,0];
-  }
-
-  function getFeatureBounds(feature) {
-    let mnLt=90, mxLt=-90, mnLn=180, mxLn=-180;
-    function m(c) {
-      if (typeof c[0] === 'number') {
-        mnLn=Math.min(mnLn,c[0]); mxLn=Math.max(mxLn,c[0]);
-        mnLt=Math.min(mnLt,c[1]); mxLt=Math.max(mxLt,c[1]);
-      } else c.forEach(m);
-    }
-    m(feature.geometry.coordinates);
-    return [[mnLt,mnLn],[mxLt,mxLn]];
-  }
-
-  function enrichFeature(feature) {
-    const iso3 = feature.properties['ISO3166-1-Alpha-3'] || '';
-    feature.properties.name = feature.properties.name || 'Unknown';
-    const cen = getFeatureCentroid(feature);
-    if (COUNTRY_DATA[iso3]) {
-      Object.assign(feature.properties, COUNTRY_DATA[iso3]);
-    } else {
-      const h = hashString(feature.properties.name);
-      feature.properties.population = Math.max(0.1, Math.round((1+(h%25))*10)/10);
-      feature.properties.climate    = Math.max(-5, Math.min(32, Math.round((30-Math.abs(cen[1])*0.4+((h%11)-5)*0.4)*10)/10));
-      feature.properties.gdp        = Math.max(1, Math.round(feature.properties.population*(2+(h%15))));
-    }
-    feature.bounds = getFeatureBounds(feature);
-    return feature;
-  }
-
-  function buildSearchIndex() {
-    searchIndex = [...places];
-    if (geoData) {
-      geoData.features.forEach(f => searchIndex.push({ label: f.properties.name, bounds: f.bounds, feature: f }));
-    }
-  }
-
-  // ── Init ────────────────────────────────────────────────────────────────────
-  async function initializeDashboard() {
-    try {
-      const res  = await fetch('./data/countries.geojson');
-      const data = await res.json();
-      data.features = data.features.map(enrichFeature);
-      geoData = data;
-      overlayLayer = L.geoJSON(geoData, { style: styleFeature, onEachFeature }).addTo(map);
-      buildSearchIndex();
-      renderOverlayButtons();
-      updateLegend();
-      updateTopMetrics();
-      document.getElementById('statusTag').textContent = OVERLAY_META[overlayMode].label;
-    } catch (err) {
-      console.error('Could not load dataset:', err);
-      document.getElementById('statusTag').textContent = 'Load failed';
-    }
-  }
-
-  // ── Search ──────────────────────────────────────────────────────────────────
-  const searchInput = document.getElementById('search');
-  const suggestions = document.getElementById('suggestions');
-
-  searchInput.addEventListener('input', () => {
-    const q = searchInput.value.trim().toLowerCase();
-    suggestions.innerHTML = '';
-    if (!q) return;
-    searchIndex.filter(x => x.label.toLowerCase().includes(q)).slice(0, 8).forEach(item => {
-      const div = document.createElement('div');
-      div.className = 'suggestion';
-      div.textContent = item.label;
-      div.addEventListener('click', () => {
-        if (item.bounds) map.fitBounds(item.bounds, { padding: [30,30] });
-        else map.flyTo([item.lat, item.lon], 5, { animate: true, duration: 0.8 });
-        if (item.feature && overlayLayer) {
-          const layer = overlayLayer.getLayers().find(l => l.feature.properties.name === item.label);
-          if (layer) selectFeature(item.feature, layer);
-        }
-        searchInput.value = item.label;
-        suggestions.innerHTML = '';
-      });
-      suggestions.appendChild(div);
-    });
-  });
-
-  document.getElementById('zoomHome').addEventListener('click', () => {
-    map.flyTo([20,0], 2, { animate: true, duration: 0.8 });
-    searchInput.value = '';
-    suggestions.innerHTML = '';
-  });
-
-  document.addEventListener('click', e => {
-    if (!e.target.closest('.search-group') && !e.target.closest('.suggestions')) suggestions.innerHTML = '';
-  });
-
-  document.addEventListener('keydown', e => {
-    if ((e.key === '/' || (e.ctrlKey && e.key === 'f')) && document.activeElement !== searchInput) {
-      e.preventDefault(); searchInput.focus();
-    }
-    if (e.key === 'Escape') { searchInput.value = ''; suggestions.innerHTML = ''; searchInput.blur(); }
-  });
-
-  // ── City markers ────────────────────────────────────────────────────────────
-  places.forEach(city => {
-    L.circleMarker([city.lat, city.lon], { radius: 6, fillColor: '#ffe64d', color: '#ffffff', weight: 1, fillOpacity: 0.88 })
-      .bindTooltip(`<strong>${city.label}</strong>`, { direction: 'top' })
-      .addTo(map);
-  });
-
-  initializeDashboard();
-  </script>
+// ── Tab nav ───────────────────────────────────────────────────────────────
+document.getElementById('tabNav').addEventListener('click', e => {
+  const btn = e.target.closest('.tab-btn');
+  if (btn) switchTab(btn.dataset.tab);
+});
+</script>
 </body>
 </html>

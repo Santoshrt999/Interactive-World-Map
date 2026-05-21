@@ -38,9 +38,10 @@ def fetch_poverty():
 
 def fetch_refugees():
     print('  Fetching refugee data (UNHCR, Open / UNHCR)...')
+    # coo_all=true groups by country of origin; omitting download=false avoids ZIP response
     url = (
         'https://api.unhcr.org/population/v1/population/'
-        '?limit=300&dataset=refugees&yearFrom=2023&yearTo=2023&download=false'
+        '?limit=300&dataset=refugees&yearFrom=2023&yearTo=2023&coo_all=true'
     )
     data = {}
     try:
@@ -48,7 +49,7 @@ def fetch_refugees():
         for item in raw.get('items', []):
             iso3 = item.get('coo_iso', '').strip()
             count = item.get('refugees', 0)
-            if iso3 and len(iso3) == 3 and count:
+            if iso3 and len(iso3) == 3 and iso3 != '-' and count and str(count) != '-':
                 data[iso3] = data.get(iso3, 0) + int(count)
     except Exception as exc:
         print(f'    UNHCR API unavailable ({exc}), falling back to World Bank SM.POP.REFG.OR...')
