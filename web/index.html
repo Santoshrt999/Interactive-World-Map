@@ -355,9 +355,204 @@
       .compare-card.right .compare-bar-wrap { flex-direction: row; }
       .compare-card.right .compare-bar-val  { text-align: left; }
     }
+
+    /* ── Splash Screen ────────────────────────────────────────────────────── */
+    #splash {
+      position: fixed; inset: 0; z-index: 9999;
+      background: #0a0f1a;
+      display: flex; align-items: center; justify-content: center;
+      transition: opacity .8s ease;
+      overflow: hidden;
+    }
+    #splash.fade-out { opacity: 0; pointer-events: none; }
+
+    .splash-star {
+      position: absolute; border-radius: 50%; pointer-events: none;
+      background: rgba(255,255,255,.9);
+      animation: twinkle var(--twink-dur,3s) ease-in-out infinite;
+      animation-delay: var(--twink-delay,0s);
+    }
+    @keyframes twinkle {
+      0%,100% { opacity: var(--twink-min,.08); }
+      50%      { opacity: 1; }
+    }
+
+    .splash-card {
+      position: relative; z-index: 1;
+      width: min(520px, 92vw);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      background: rgba(255,255,255,.04);
+      border: 1px solid rgba(255,255,255,.08);
+      border-radius: 20px;
+      padding: 40px 44px 36px;
+      display: flex; flex-direction: column; align-items: center; gap: 18px;
+      text-align: center;
+    }
+
+    .splash-globe {
+      font-size: 60px; display: inline-block;
+      animation: globeFloat 4s ease-in-out infinite;
+    }
+    @keyframes globeFloat {
+      0%,100% { transform: translateY(0);    filter: drop-shadow(0 0 18px rgba(96,165,250,.55)); }
+      50%     { transform: translateY(-9px); filter: drop-shadow(0 0 34px rgba(52,211,153,.8)); }
+    }
+
+    .splash-title {
+      font-size: 2.8rem; font-weight: 700; line-height: 1.1; margin: 0;
+      background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: fadeInUp .6s ease both;
+    }
+
+    .splash-tagline {
+      font-size: 1rem; color: rgba(255,255,255,.65); line-height: 1.65;
+      max-width: 400px; margin: 0;
+      animation: fadeInUp .6s .3s ease both;
+    }
+
+    .splash-pills {
+      display: flex; flex-wrap: wrap; gap: 7px; justify-content: center;
+      width: 100%;
+    }
+    .splash-pill {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 5px 13px; border-radius: 100px; cursor: default;
+      background: rgba(255,255,255,.05);
+      border-top: 1px solid rgba(255,255,255,.08);
+      border-right: 1px solid rgba(255,255,255,.08);
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      border-left: 3px solid var(--pc,#60a5fa);
+      font-size: .78rem; color: rgba(255,255,255,.82);
+      opacity: 0; animation: pillPop .4s ease forwards;
+      transition: transform .18s, box-shadow .18s;
+    }
+    .splash-pill:hover { transform: scale(1.05); box-shadow: 0 0 12px var(--pc,#60a5fa); }
+    @keyframes pillPop { to { opacity: 1; } }
+
+    .splash-stats {
+      display: flex; align-items: stretch; width: 100%;
+      background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
+      border-radius: 14px; overflow: hidden;
+      animation: fadeInUp .5s 1.5s ease both;
+    }
+    .splash-stat {
+      flex: 1; padding: 14px 10px;
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+    }
+    .splash-stat-num {
+      font-size: 1.65rem; font-weight: 800; line-height: 1;
+      background: linear-gradient(135deg,#60a5fa,#34d399);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      background-clip: text; font-variant-numeric: tabular-nums;
+    }
+    .splash-stat-label { font-size: .7rem; color: rgba(255,255,255,.45); }
+    .splash-stat-sep   { width: 1px; background: rgba(255,255,255,.07); flex-shrink: 0; }
+
+    .splash-author {
+      font-size: .8rem; color: rgba(255,255,255,.38);
+      font-style: italic; margin: -4px 0;
+      animation: fadeInUp .4s 1.7s ease both;
+    }
+
+    #splashExploreBtn {
+      padding: 14px 40px; border-radius: 50px;
+      background: linear-gradient(135deg,#3b82f6,#34d399);
+      border: none; color: #fff;
+      font-size: 1rem; font-weight: 600; cursor: pointer;
+      transition: transform .2s, filter .2s;
+      animation: fadeInUp .4s 1.9s ease both;
+      display: inline-flex; align-items: center; gap: 8px;
+      box-shadow: 0 8px 32px rgba(59,130,246,.35);
+    }
+    #splashExploreBtn:hover { transform: scale(1.04); filter: brightness(1.15); }
+    .splash-btn-spin {
+      width: 16px; height: 16px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
+      animation: rotate .8s linear infinite; display: none;
+    }
+    #splashExploreBtn.loading .splash-btn-spin { display: inline-block; }
+
+    #splashSkip {
+      font-size: .75rem; color: rgba(255,255,255,.28); cursor: pointer;
+      background: none; border: none; padding: 0;
+      transition: color .15s;
+      animation: fadeInUp .4s 2.1s ease both;
+    }
+    #splashSkip:hover { color: rgba(255,255,255,.58); }
+
+    /* ── Map copyright footer ─────────────────────────────────────────────── */
+    #map-footer {
+      position: fixed; bottom: 62px; right: 10px; z-index: 50;
+      font-size: 10px; color: rgba(255,255,255,.2);
+      pointer-events: none; user-select: none; letter-spacing: .02em;
+    }
+
+    @media (max-width: 540px) {
+      .splash-card { padding: 28px 18px 24px; gap: 14px; }
+      .splash-title { font-size: 2rem; }
+      .splash-tagline { font-size: .9rem; }
+      #splashExploreBtn { padding: 12px 28px; font-size: .9rem; }
+      .splash-stat-num { font-size: 1.3rem; }
+      .splash-globe { font-size: 48px; }
+      #map-footer { display: none; }
+    }
   </style>
 </head>
 <body>
+
+<div id="splash">
+  <div id="splash-stars"></div>
+  <div class="splash-card">
+
+    <div class="splash-globe">🌍</div>
+
+    <h1 class="splash-title">Interactive World Map</h1>
+
+    <p class="splash-tagline">Explore our planet through data — population, climate,
+      conflict, food security, natural resources &amp; more.</p>
+
+    <div class="splash-pills">
+      <span class="splash-pill" style="--pc:#60a5fa;animation-delay:.80s">🌍 Explorer</span>
+      <span class="splash-pill" style="--pc:#34d399;animation-delay:.88s">🌡️ Climate</span>
+      <span class="splash-pill" style="--pc:#f87171;animation-delay:.96s">❤️ Health</span>
+      <span class="splash-pill" style="--pc:#fbbf24;animation-delay:1.04s">🤝 Aid</span>
+      <span class="splash-pill" style="--pc:#a78bfa;animation-delay:1.12s">💻 Technology</span>
+      <span class="splash-pill" style="--pc:#fb923c;animation-delay:1.20s">⚔️ Conflict</span>
+      <span class="splash-pill" style="--pc:#4ade80;animation-delay:1.28s">🌾 Food &amp; Water</span>
+      <span class="splash-pill" style="--pc:#e879f9;animation-delay:1.36s">⛏️ Resources</span>
+    </div>
+
+    <div class="splash-stats">
+      <div class="splash-stat">
+        <span class="splash-stat-num" id="statCountries">0</span>
+        <span class="splash-stat-label">🌐 Countries</span>
+      </div>
+      <div class="splash-stat-sep"></div>
+      <div class="splash-stat">
+        <span class="splash-stat-num" id="statLayers">0</span>
+        <span class="splash-stat-label">📊 Data Layers</span>
+      </div>
+      <div class="splash-stat-sep"></div>
+      <div class="splash-stat">
+        <span class="splash-stat-num">AI</span>
+        <span class="splash-stat-label">🤖 Insights</span>
+      </div>
+    </div>
+
+    <div class="splash-author">Built by Santosh Goteti</div>
+
+    <button id="splashExploreBtn">
+      <span class="splash-btn-spin"></span>
+      <span>🚀 Start Exploring</span>
+    </button>
+
+    <button id="splashSkip">Skip intro ›</button>
+
+  </div>
+</div>
 
 <div id="loading">
   <div class="spin"></div>
@@ -365,6 +560,7 @@
 </div>
 
 <div id="map"></div>
+<div id="map-footer">© 2026 Santosh Goteti · MIT License</div>
 
 <aside id="sidebar">
   <div>
@@ -1233,6 +1429,68 @@ document.getElementById('tabNav').addEventListener('click', e => {
   const btn = e.target.closest('.tab-btn');
   if (btn) switchTab(btn.dataset.tab);
 });
+
+// ── Splash Screen ─────────────────────────────────────────────────────────
+(function () {
+  const splash = document.getElementById('splash');
+  if (!splash) return;
+
+  // Animated star field
+  const starsEl = document.getElementById('splash-stars');
+  for (let i = 0; i < 130; i++) {
+    const s = document.createElement('span');
+    s.className = 'splash-star';
+    const sz = (Math.random() * 2 + 0.5).toFixed(1);
+    s.style.cssText = [
+      `left:${(Math.random() * 100).toFixed(1)}%`,
+      `top:${(Math.random() * 100).toFixed(1)}%`,
+      `width:${sz}px`, `height:${sz}px`,
+      `--twink-dur:${(Math.random() * 3 + 2).toFixed(1)}s`,
+      `--twink-delay:${(Math.random() * 5).toFixed(1)}s`,
+      `--twink-min:${(Math.random() * 0.15 + 0.03).toFixed(2)}`,
+    ].join(';');
+    starsEl.appendChild(s);
+  }
+
+  // Count-up animation
+  function countUp(el, target, delay) {
+    setTimeout(() => {
+      const dur = 1200, t0 = performance.now();
+      function tick(now) {
+        const p = Math.min((now - t0) / dur, 1);
+        el.textContent = Math.round((1 - Math.pow(1 - p, 3)) * target);
+        if (p < 1) requestAnimationFrame(tick);
+        else el.textContent = target;
+      }
+      requestAnimationFrame(tick);
+    }, delay);
+  }
+  countUp(document.getElementById('statCountries'), 258, 700);
+  countUp(document.getElementById('statLayers'),   15,  850);
+
+  // Dismiss splash
+  function dismiss(instant) {
+    localStorage.setItem('iwm_visited', '1');
+    if (instant) {
+      splash.style.display = 'none';
+    } else {
+      splash.classList.add('fade-out');
+      setTimeout(() => { splash.style.display = 'none'; }, 820);
+    }
+  }
+
+  document.getElementById('splashExploreBtn').addEventListener('click', function () {
+    this.classList.add('loading');
+    setTimeout(() => dismiss(false), 500);
+  });
+
+  document.getElementById('splashSkip').addEventListener('click', () => dismiss(true));
+
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') dismiss(true); });
+
+  // Returning visitor: auto-dismiss after 1.5s
+  if (localStorage.getItem('iwm_visited')) setTimeout(() => dismiss(false), 1500);
+})();
 </script>
 </body>
 </html>
