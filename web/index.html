@@ -1470,7 +1470,6 @@ document.getElementById('tabNav').addEventListener('click', e => {
 
   // Dismiss splash
   function dismiss(instant) {
-    localStorage.setItem('iwm_visited', '1');
     if (instant) {
       splash.style.display = 'none';
     } else {
@@ -1487,9 +1486,6 @@ document.getElementById('tabNav').addEventListener('click', e => {
   document.getElementById('splashSkip').addEventListener('click', () => dismiss(true));
 
   document.addEventListener('keydown', e => { if (e.key === 'Escape') dismiss(true); });
-
-  // Returning visitor: auto-dismiss after 1.5s
-  if (localStorage.getItem('iwm_visited')) setTimeout(() => dismiss(false), 1500);
 })();
 </script>
 </body>
