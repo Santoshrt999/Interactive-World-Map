@@ -75,7 +75,7 @@
     @keyframes blink { 50% { opacity: .3; } }
 
     /* tabs */
-    .tab-nav { display: grid; grid-template-columns: repeat(4,1fr); gap: 4px; }
+    .tab-nav { display: grid; grid-template-columns: repeat(5,1fr); gap: 4px; }
     .tab-btn {
       border: 1px solid transparent; border-radius: 10px;
       padding: 9px 4px; background: var(--card-bg); color: var(--muted);
@@ -166,7 +166,7 @@
 
     /* ── Country panel ───────────────────────────────────────────────────── */
     #country-panel {
-      position: fixed; bottom: 24px; right: 24px; width: 320px;
+      position: fixed; bottom: 80px; right: 24px; width: 320px;
       z-index: 100; display: none;
       background: var(--panel);
       backdrop-filter: blur(40px) saturate(1.6);
@@ -214,21 +214,146 @@
     .load-txt { font-size: 13px; color: var(--muted); }
 
     /* ── MapLibre overrides ───────────────────────────────────────────────── */
-    .maplibregl-ctrl-bottom-right { right: 8px; bottom: 8px; }
+    .maplibregl-ctrl-bottom-right { right: 8px; bottom: 64px; }
     .maplibregl-ctrl-bottom-left  { left: calc(var(--sidebar-w) + 8px); }
     .maplibregl-ctrl-attrib       { font-size: 10px; }
     .maplibregl-ctrl button { border-radius: 8px !important; }
 
-    /* ── Mobile ───────────────────────────────────────────────────────────── */
+    /* ── Timeline slider ────────────────────────────────────────────────────── */
+    #timeline-bar {
+      position: fixed; bottom: 0; left: var(--sidebar-w); right: 0; z-index: 100;
+      height: 56px; display: flex; align-items: center; gap: 12px; padding: 0 20px;
+      background: var(--panel); backdrop-filter: blur(30px) saturate(1.4);
+      -webkit-backdrop-filter: blur(30px) saturate(1.4);
+      border-top: 1px solid var(--panel-border);
+    }
+    #tlPlay {
+      width: 32px; height: 32px; border-radius: 50%;
+      border: 1px solid var(--card-border); background: var(--card-bg); color: var(--text);
+      cursor: pointer; font-size: 12px; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all .15s;
+    }
+    #tlPlay:hover { background: rgba(124,109,250,.3); border-color: var(--accent); }
+    #tlPlay.playing { background: rgba(0,210,211,.2); border-color: var(--accent2); }
+    #tlYear {
+      font-size: 15px; font-weight: 800; min-width: 44px; text-align: center;
+      color: var(--accent); font-variant-numeric: tabular-nums; flex-shrink: 0;
+    }
+    #tlSlider {
+      flex: 1; -webkit-appearance: none; appearance: none; height: 4px;
+      border-radius: 100px; outline: none; cursor: pointer;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+    }
+    #tlSlider::-webkit-slider-thumb {
+      -webkit-appearance: none; appearance: none;
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--text); border: 2px solid var(--accent); cursor: pointer;
+      box-shadow: 0 0 8px rgba(124,109,250,.5);
+    }
+    #tlSlider::-moz-range-thumb {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: var(--text); border: 2px solid var(--accent); cursor: pointer;
+    }
+    .tl-label { font-size: 10px; color: var(--muted); flex-shrink: 0; }
+
+    /* ── Compare mode ───────────────────────────────────────────────────────── */
+    #compare-btn {
+      position: fixed; top: 16px; right: 16px; z-index: 150;
+      display: flex; align-items: center; gap: 6px; padding: 9px 14px;
+      border-radius: 12px; border: 1px solid var(--card-border);
+      background: var(--panel); color: var(--text);
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      backdrop-filter: blur(20px); transition: all .2s;
+    }
+    #compare-btn:hover { background: rgba(124,109,250,.2); border-color: var(--accent); }
+    #compare-btn.active { background: rgba(124,109,250,.3); border-color: var(--accent); box-shadow: 0 0 18px rgba(124,109,250,.3); }
+    .compare-count {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: var(--accent); color: #fff; border-radius: 50%;
+      width: 18px; height: 18px; font-size: 10px;
+    }
+    #compare-drawer {
+      position: fixed; bottom: 56px; left: var(--sidebar-w); right: 0; z-index: 99;
+      max-height: 0; overflow: hidden;
+      background: var(--panel); backdrop-filter: blur(40px) saturate(1.6);
+      -webkit-backdrop-filter: blur(40px) saturate(1.6);
+      border-top: 1px solid var(--panel-border);
+      transition: max-height .4s cubic-bezier(.16,1,.3,1);
+    }
+    #compare-drawer.open { max-height: 360px; overflow-y: auto; }
+    .compare-inner { padding: 16px 24px 20px; }
+    .compare-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .compare-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); }
+    .compare-x {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 8px; width: 28px; height: 28px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      color: var(--muted); font-size: 12px; transition: all .15s;
+    }
+    .compare-x:hover { background: rgba(255,255,255,.1); color: var(--text); }
+    .compare-grid { display: grid; grid-template-columns: 1fr 40px 1fr; gap: 0; align-items: start; }
+    .compare-vs { text-align: center; font-size: 16px; font-weight: 900; color: var(--muted); padding-top: 32px; }
+    .compare-card-head { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
+    .compare-flag { font-size: 26px; }
+    .compare-name { font-size: 14px; font-weight: 700; }
+    .compare-iso  { font-size: 10px; color: var(--muted); }
+    .compare-row  { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+    .compare-row-label { font-size: 10px; color: var(--muted); width: 80px; flex-shrink: 0; text-align: right; }
+    .compare-bar-wrap  { flex: 1; display: flex; align-items: center; gap: 6px; }
+    .compare-bar-bg { flex: 1; height: 7px; background: rgba(255,255,255,.06); border-radius: 100px; overflow: hidden; }
+    .compare-bar { height: 100%; border-radius: 100px; background: linear-gradient(90deg,var(--accent),var(--accent2)); transition: width .6s cubic-bezier(.16,1,.3,1); }
+    .compare-bar.win { background: linear-gradient(90deg,var(--success),var(--accent2)); box-shadow: 0 0 6px rgba(0,184,148,.4); }
+    .compare-bar-val { font-size: 10px; font-weight: 700; color: var(--text); min-width: 52px; }
+    /* right-side card mirrors bar direction */
+    .compare-card.right .compare-row { flex-direction: row-reverse; }
+    .compare-card.right .compare-row-label { text-align: left; }
+    .compare-card.right .compare-bar-wrap { flex-direction: row-reverse; }
+    .compare-card.right .compare-bar-val  { text-align: right; }
+
+    /* ── AI Insight ─────────────────────────────────────────────────────────── */
+    .ai-section { margin-top: 12px; border-top: 1px solid var(--card-border); padding-top: 12px; }
+    .ai-section-title { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--muted); margin-bottom: 8px; }
+    .ai-gen-btn {
+      width: 100%; padding: 10px; border-radius: 10px;
+      border: 1px solid rgba(124,109,250,.3); background: rgba(124,109,250,.1);
+      color: var(--text); font-size: 12px; font-weight: 600; cursor: pointer;
+      transition: all .2s; display: flex; align-items: center; justify-content: center; gap: 6px;
+    }
+    .ai-gen-btn:hover { background: rgba(124,109,250,.22); border-color: var(--accent); }
+    .ai-gen-btn:disabled { opacity: .5; cursor: not-allowed; }
+    .ai-spinner {
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid rgba(124,109,250,.3); border-top-color: var(--accent);
+      animation: rotate 1s linear infinite;
+    }
+    .ai-insight-card {
+      margin-top: 8px; padding: 12px;
+      background: rgba(124,109,250,.08); border: 1px solid rgba(124,109,250,.2);
+      border-radius: 12px; font-size: 11px; line-height: 1.75; color: var(--text);
+      animation: fadeInUp .4s ease;
+    }
+    @keyframes fadeInUp { from { opacity: 0; transform: translateY(5px); } }
+    .ai-error { margin-top: 8px; padding: 10px; background: rgba(200,30,30,.08); border: 1px solid rgba(200,30,30,.25); border-radius: 10px; font-size: 11px; color: #ff8080; }
+
+    /* ── Mobile adjustments ─────────────────────────────────────────────────── */
     @media (max-width: 680px) {
       :root { --sidebar-w: 100vw; }
       #sidebar {
-        top: auto; bottom: 0; height: 52vh;
+        top: auto; bottom: 56px; height: 52vh;
         border-right: none; border-top: 1px solid var(--panel-border);
         animation: slideInUp .45s cubic-bezier(.16,1,.3,1) both;
       }
       @keyframes slideInUp { from { transform: translateY(100%); } }
       #country-panel { display: none !important; }
+      #timeline-bar { left: 0; }
+      #compare-drawer { left: 0; }
+      #compare-btn { top: auto; bottom: 64px; right: 12px; }
+      .compare-grid { grid-template-columns: 1fr; }
+      .compare-vs { display: none; }
+      .compare-card.right .compare-row { flex-direction: row; }
+      .compare-card.right .compare-row-label { text-align: right; }
+      .compare-card.right .compare-bar-wrap { flex-direction: row; }
+      .compare-card.right .compare-bar-val  { text-align: left; }
     }
   </style>
 </head>
@@ -252,6 +377,7 @@
     <button class="tab-btn" data-tab="climate">Climate</button>
     <button class="tab-btn" data-tab="health">Health</button>
     <button class="tab-btn" data-tab="humanitarian">Aid</button>
+    <button class="tab-btn" data-tab="tech">Tech</button>
   </nav>
 
   <div class="search-wrap">
@@ -303,7 +429,41 @@
   <div class="cp-bar-bg"><div class="cp-bar" id="cpBar" style="width:0%"></div></div>
   <div id="chartWrap"><canvas id="topChart"></canvas></div>
   <div class="cp-src"    id="cpSrc"></div>
+  <div class="ai-section">
+    <div class="ai-section-title">✨ AI Insight</div>
+    <button class="ai-gen-btn" id="aiGenBtn">✨ Generate Insight</button>
+    <div id="aiResult"></div>
+  </div>
 </div>
+
+<!-- Timeline Bar -->
+<div id="timeline-bar">
+  <button id="tlPlay" title="Play">▶</button>
+  <span class="tl-label">2000</span>
+  <input id="tlSlider" type="range" min="2000" max="2024" value="2022" step="1" />
+  <span class="tl-label">2024</span>
+  <span id="tlYear">2022</span>
+</div>
+
+<!-- Compare Drawer -->
+<div id="compare-drawer">
+  <div class="compare-inner">
+    <div class="compare-header">
+      <span class="compare-title">Country Comparison</span>
+      <button class="compare-x" id="compareClose">✕</button>
+    </div>
+    <div class="compare-grid">
+      <div class="compare-card" id="compare-card-a"></div>
+      <div class="compare-vs">vs</div>
+      <div class="compare-card right" id="compare-card-b"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Compare Button -->
+<button id="compare-btn" title="Compare two countries">
+  ⚖️ Compare <span class="compare-count" id="compareCount" style="display:none">0</span>
+</button>
 
 <script src="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
@@ -400,6 +560,28 @@ const OVERLAY_META = {
     colorLow: [255,245,225], colorHigh: [180,70,15],
     format: v => +v >= 1e6 ? (+v/1e6).toFixed(1)+'M' : +v >= 1e3 ? (+v/1e3).toFixed(0)+'K' : String(+v),
   },
+  // Tech tab
+  internet: {
+    label: 'Internet %', icon: '🌐', unit: '% of population', prop: 'internet',
+    source: 'ITU / World Bank', year: '2023', license: 'CC BY 4.0',
+    sourceUrl: 'https://data.worldbank.org/indicator/IT.NET.USER.ZS',
+    colorLow: [30,30,50], colorHigh: [0,160,255],
+    format: v => (+v).toFixed(0)+'%',
+  },
+  mobileRatio: {
+    label: 'Mobile Ratio', icon: '📱', unit: 'mobile per broadband', prop: 'mobileRatio',
+    source: 'ITU 2023', year: '2023', license: 'CC BY 4.0',
+    sourceUrl: 'https://www.itu.int/en/ITU-D/Statistics/',
+    colorLow: [0,180,255], colorHigh: [30,30,50],
+    format: v => (+v).toFixed(1)+'×',
+  },
+  aiReadiness: {
+    label: 'AI Readiness', icon: '🤖', unit: 'index 0–100', prop: 'aiReadiness',
+    source: 'Oxford Insights AI Readiness Index', year: '2023', license: 'CC BY 4.0',
+    sourceUrl: 'https://oxfordinsights.com/ai-readiness/',
+    colorLow: [30,30,50], colorHigh: [0,220,200],
+    format: v => (+v).toFixed(0),
+  },
 };
 
 const TABS = {
@@ -407,124 +589,125 @@ const TABS = {
   climate:      { overlays: ['temperature','co2','renewable'] },
   health:       { overlays: ['vaccination','life_expectancy','healthcare'] },
   humanitarian: { overlays: ['poverty','conflicts','refugees'] },
+  tech:         { overlays: ['internet','mobileRatio','aiReadiness'] },
 };
 
 const COUNTRY_DATA = {
-  'CHN': { population: 1412, gdp: 17963, climate: 14 },
-  'IND': { population: 1408, gdp: 3550,  climate: 25 },
-  'USA': { population: 335,  gdp: 25440, climate: 12 },
-  'IDN': { population: 277,  gdp: 1319,  climate: 27 },
-  'PAK': { population: 231,  gdp: 376,   climate: 22 },
-  'BRA': { population: 215,  gdp: 1920,  climate: 25 },
-  'NGA': { population: 218,  gdp: 477,   climate: 28 },
-  'BGD': { population: 170,  gdp: 460,   climate: 26 },
-  'RUS': { population: 144,  gdp: 2245,  climate: 0  },
-  'ETH': { population: 123,  gdp: 111,   climate: 22 },
-  'MEX': { population: 128,  gdp: 1323,  climate: 21 },
-  'JPN': { population: 125,  gdp: 4231,  climate: 16 },
-  'PHL': { population: 115,  gdp: 404,   climate: 27 },
-  'EGY': { population: 105,  gdp: 476,   climate: 22 },
-  'COD': { population: 100,  gdp: 55,    climate: 24 },
-  'VNM': { population: 97,   gdp: 409,   climate: 27 },
-  'IRN': { population: 86,   gdp: 368,   climate: 18 },
-  'TUR': { population: 85,   gdp: 905,   climate: 14 },
-  'DEU': { population: 84,   gdp: 4074,  climate: 10 },
-  'THA': { population: 72,   gdp: 522,   climate: 28 },
-  'GBR': { population: 67,   gdp: 3070,  climate: 11 },
-  'TZA': { population: 64,   gdp: 76,    climate: 23 },
-  'FRA': { population: 68,   gdp: 2782,  climate: 13 },
-  'ZAF': { population: 60,   gdp: 405,   climate: 17 },
-  'MMR': { population: 55,   gdp: 65,    climate: 27 },
-  'KEN': { population: 55,   gdp: 107,   climate: 22 },
-  'KOR': { population: 52,   gdp: 1665,  climate: 13 },
-  'COL': { population: 51,   gdp: 344,   climate: 24 },
-  'ESP': { population: 47,   gdp: 1418,  climate: 16 },
-  'UGA': { population: 47,   gdp: 42,    climate: 23 },
-  'ARG': { population: 46,   gdp: 632,   climate: 16 },
-  'DZA': { population: 45,   gdp: 191,   climate: 12 },
-  'SDN': { population: 45,   gdp: 33,    climate: 25 },
-  'IRQ': { population: 42,   gdp: 264,   climate: 23 },
-  'UKR': { population: 44,   gdp: 160,   climate: 9  },
-  'CAN': { population: 38,   gdp: 2139,  climate: 0  },
-  'MAR': { population: 37,   gdp: 142,   climate: 18 },
-  'SAU': { population: 36,   gdp: 1109,  climate: 26 },
-  'POL': { population: 38,   gdp: 696,   climate: 9  },
-  'MYS': { population: 33,   gdp: 407,   climate: 27 },
-  'MOZ': { population: 32,   gdp: 18,    climate: 23 },
-  'GHA': { population: 32,   gdp: 77,    climate: 27 },
-  'PER': { population: 33,   gdp: 242,   climate: 19 },
-  'AGO': { population: 34,   gdp: 95,    climate: 22 },
-  'AFG': { population: 41,   gdp: 20,    climate: 12 },
-  'VEN': { population: 29,   gdp: 105,   climate: 28 },
-  'MDG': { population: 28,   gdp: 14,    climate: 22 },
-  'CMR': { population: 27,   gdp: 44,    climate: 25 },
-  'CIV': { population: 26,   gdp: 70,    climate: 27 },
-  'NER': { population: 25,   gdp: 15,    climate: 29 },
-  'AUS': { population: 26,   gdp: 1675,  climate: 22 },
-  'ROU': { population: 19,   gdp: 301,   climate: 10 },
-  'NLD': { population: 18,   gdp: 1013,  climate: 11 },
-  'BEL': { population: 11,   gdp: 593,   climate: 11 },
-  'CHE': { population: 9,    gdp: 807,   climate: 9  },
-  'SWE': { population: 10,   gdp: 585,   climate: 6  },
-  'NOR': { population: 5,    gdp: 579,   climate: 4  },
-  'ITA': { population: 60,   gdp: 2011,  climate: 15 },
-  'ARE': { population: 10,   gdp: 507,   climate: 28 },
-  'ISR': { population: 9,    gdp: 522,   climate: 21 },
-  'SGP': { population: 6,    gdp: 397,   climate: 28 },
-  'NZL': { population: 5,    gdp: 245,   climate: 14 },
-  'CHL': { population: 19,   gdp: 301,   climate: 12 },
-  'PRT': { population: 10,   gdp: 254,   climate: 17 },
-  'GRC': { population: 11,   gdp: 219,   climate: 18 },
-  'CZE': { population: 11,   gdp: 290,   climate: 9  },
-  'HUN': { population: 10,   gdp: 179,   climate: 11 },
-  'AUT': { population: 9,    gdp: 471,   climate: 9  },
-  'DNK': { population: 6,    gdp: 395,   climate: 9  },
-  'FIN': { population: 6,    gdp: 283,   climate: 4  },
-  'TWN': { population: 23,   gdp: 790,   climate: 24 },
-  'LKA': { population: 22,   gdp: 83,    climate: 28 },
-  'SYR': { population: 21,   gdp: 23,    climate: 18 },
-  'KAZ': { population: 19,   gdp: 225,   climate: 8  },
-  'MLI': { population: 22,   gdp: 19,    climate: 29 },
-  'BFA': { population: 22,   gdp: 19,    climate: 29 },
-  'MWI': { population: 20,   gdp: 13,    climate: 23 },
-  'ZMB': { population: 19,   gdp: 28,    climate: 20 },
-  'ZWE': { population: 16,   gdp: 26,    climate: 21 },
-  'ECU': { population: 18,   gdp: 115,   climate: 22 },
-  'GTM': { population: 17,   gdp: 85,    climate: 24 },
-  'SOM': { population: 17,   gdp: 9,     climate: 28 },
-  'CUB': { population: 11,   gdp: 107,   climate: 26 },
-  'BOL': { population: 12,   gdp: 44,    climate: 18 },
-  'HTI': { population: 12,   gdp: 20,    climate: 28 },
-  'BLR': { population: 10,   gdp: 73,    climate: 8  },
-  'PRY': { population: 7,    gdp: 40,    climate: 24 },
-  'HND': { population: 10,   gdp: 31,    climate: 25 },
-  'SVN': { population: 2,    gdp: 62,    climate: 11 },
-  'LBY': { population: 7,    gdp: 46,    climate: 20 },
-  'TUN': { population: 12,   gdp: 46,    climate: 19 },
-  'SEN': { population: 17,   gdp: 28,    climate: 28 },
-  'TCD': { population: 17,   gdp: 12,    climate: 27 },
-  'GIN': { population: 13,   gdp: 16,    climate: 27 },
-  'RWA': { population: 14,   gdp: 11,    climate: 21 },
-  'BEN': { population: 13,   gdp: 17,    climate: 28 },
-  'TJK': { population: 10,   gdp: 10,    climate: 11 },
-  'AZE': { population: 10,   gdp: 78,    climate: 15 },
-  'HRV': { population: 4,    gdp: 71,    climate: 13 },
-  'BGR': { population: 7,    gdp: 87,    climate: 12 },
-  'SRB': { population: 7,    gdp: 63,    climate: 12 },
-  'SVK': { population: 6,    gdp: 118,   climate: 10 },
-  'LTU': { population: 3,    gdp: 70,    climate: 8  },
-  'LVA': { population: 2,    gdp: 42,    climate: 7  },
-  'EST': { population: 1,    gdp: 38,    climate: 7  },
-  'QAT': { population: 3,    gdp: 236,   climate: 29 },
-  'KWT': { population: 4,    gdp: 184,   climate: 28 },
-  'OMN': { population: 5,    gdp: 104,   climate: 28 },
-  'BHR': { population: 2,    gdp: 44,    climate: 28 },
-  'JOR': { population: 10,   gdp: 46,    climate: 18 },
-  'LBN': { population: 5,    gdp: 23,    climate: 20 },
-  'HKG': { population: 7,    gdp: 369,   climate: 24 },
-  'MNG': { population: 3,    gdp: 17,    climate: 1  },
-  'PNG': { population: 10,   gdp: 30,    climate: 26 },
-  'FJI': { population: 1,    gdp: 4,     climate: 26 },
+  'CHN': { population: 1412, gdp: 17963, climate: 14, internet: 73, mobileRatio: 2.8, aiReadiness: 62 },
+  'IND': { population: 1408, gdp: 3550,  climate: 25, internet: 52, mobileRatio: 8.5, aiReadiness: 49 },
+  'USA': { population: 335,  gdp: 25440, climate: 12, internet: 92, mobileRatio: 1.4, aiReadiness: 90 },
+  'IDN': { population: 277,  gdp: 1319,  climate: 27, internet: 66, mobileRatio:12.0, aiReadiness: 44 },
+  'PAK': { population: 231,  gdp: 376,   climate: 22, internet: 36, mobileRatio:18.0, aiReadiness: 33 },
+  'BRA': { population: 215,  gdp: 1920,  climate: 25, internet: 81, mobileRatio: 3.5, aiReadiness: 55 },
+  'NGA': { population: 218,  gdp: 477,   climate: 28, internet: 36, mobileRatio:22.0, aiReadiness: 30 },
+  'BGD': { population: 170,  gdp: 460,   climate: 26, internet: 39, mobileRatio:15.0, aiReadiness: 34 },
+  'RUS': { population: 144,  gdp: 2245,  climate: 0,  internet: 88, mobileRatio: 2.2, aiReadiness: 58 },
+  'ETH': { population: 123,  gdp: 111,   climate: 22, internet: 24, mobileRatio:25.0, aiReadiness: 25 },
+  'MEX': { population: 128,  gdp: 1323,  climate: 21, internet: 76, mobileRatio: 4.2, aiReadiness: 52 },
+  'JPN': { population: 125,  gdp: 4231,  climate: 16, internet: 93, mobileRatio: 1.8, aiReadiness: 78 },
+  'PHL': { population: 115,  gdp: 404,   climate: 27, internet: 68, mobileRatio:10.0, aiReadiness: 43 },
+  'EGY': { population: 105,  gdp: 476,   climate: 22, internet: 72, mobileRatio: 5.5, aiReadiness: 45 },
+  'COD': { population: 100,  gdp: 55,    climate: 24, internet: 18, mobileRatio:30.0, aiReadiness: 16 },
+  'VNM': { population: 97,   gdp: 409,   climate: 27, internet: 74, mobileRatio: 6.0, aiReadiness: 45 },
+  'IRN': { population: 86,   gdp: 368,   climate: 18, internet: 78, mobileRatio: 3.8, aiReadiness: 40 },
+  'TUR': { population: 85,   gdp: 905,   climate: 14, internet: 81, mobileRatio: 3.2, aiReadiness: 54 },
+  'DEU': { population: 84,   gdp: 4074,  climate: 10, internet: 92, mobileRatio: 1.6, aiReadiness: 82 },
+  'THA': { population: 72,   gdp: 522,   climate: 28, internet: 72, mobileRatio: 4.5, aiReadiness: 55 },
+  'GBR': { population: 67,   gdp: 3070,  climate: 11, internet: 96, mobileRatio: 1.5, aiReadiness: 86 },
+  'TZA': { population: 64,   gdp: 76,    climate: 23, internet: 26, mobileRatio:28.0, aiReadiness: 22 },
+  'FRA': { population: 68,   gdp: 2782,  climate: 13, internet: 93, mobileRatio: 1.7, aiReadiness: 85 },
+  'ZAF': { population: 60,   gdp: 405,   climate: 17, internet: 72, mobileRatio: 6.8, aiReadiness: 52 },
+  'MMR': { population: 55,   gdp: 65,    climate: 27, internet: 38, mobileRatio:20.0, aiReadiness: 28 },
+  'KEN': { population: 55,   gdp: 107,   climate: 22, internet: 42, mobileRatio:18.0, aiReadiness: 38 },
+  'KOR': { population: 52,   gdp: 1665,  climate: 13, internet: 97, mobileRatio: 1.6, aiReadiness: 82 },
+  'COL': { population: 51,   gdp: 344,   climate: 24, internet: 73, mobileRatio: 5.2, aiReadiness: 47 },
+  'ESP': { population: 47,   gdp: 1418,  climate: 16, internet: 93, mobileRatio: 1.8, aiReadiness: 78 },
+  'UGA': { population: 47,   gdp: 42,    climate: 23, internet: 26, mobileRatio:26.0, aiReadiness: 24 },
+  'ARG': { population: 46,   gdp: 632,   climate: 16, internet: 82, mobileRatio: 3.8, aiReadiness: 52 },
+  'DZA': { population: 45,   gdp: 191,   climate: 12, internet: 63, mobileRatio: 7.0, aiReadiness: 38 },
+  'SDN': { population: 45,   gdp: 33,    climate: 25, internet: 31, mobileRatio:22.0, aiReadiness: 20 },
+  'IRQ': { population: 42,   gdp: 264,   climate: 23, internet: 71, mobileRatio: 8.0, aiReadiness: 28 },
+  'UKR': { population: 44,   gdp: 160,   climate: 9,  internet: 79, mobileRatio: 3.5, aiReadiness: 44 },
+  'CAN': { population: 38,   gdp: 2139,  climate: 0,  internet: 94, mobileRatio: 1.6, aiReadiness: 87 },
+  'MAR': { population: 37,   gdp: 142,   climate: 18, internet: 88, mobileRatio: 6.5, aiReadiness: 46 },
+  'SAU': { population: 36,   gdp: 1109,  climate: 26, internet: 98, mobileRatio: 2.2, aiReadiness: 70 },
+  'POL': { population: 38,   gdp: 696,   climate: 9,  internet: 91, mobileRatio: 2.4, aiReadiness: 65 },
+  'MYS': { population: 33,   gdp: 407,   climate: 27, internet: 91, mobileRatio: 3.2, aiReadiness: 68 },
+  'MOZ': { population: 32,   gdp: 18,    climate: 23, internet: 17, mobileRatio:32.0, aiReadiness: 15 },
+  'GHA': { population: 32,   gdp: 77,    climate: 27, internet: 58, mobileRatio:14.0, aiReadiness: 36 },
+  'PER': { population: 33,   gdp: 242,   climate: 19, internet: 71, mobileRatio: 6.0, aiReadiness: 48 },
+  'AGO': { population: 34,   gdp: 95,    climate: 22, internet: 33, mobileRatio:20.0, aiReadiness: 25 },
+  'AFG': { population: 41,   gdp: 20,    climate: 12, internet: 18, mobileRatio:28.0, aiReadiness: 10 },
+  'VEN': { population: 29,   gdp: 105,   climate: 28, internet: 72, mobileRatio: 5.5, aiReadiness: 30 },
+  'MDG': { population: 28,   gdp: 14,    climate: 22, internet: 20, mobileRatio:30.0, aiReadiness: 14 },
+  'CMR': { population: 27,   gdp: 44,    climate: 25, internet: 37, mobileRatio:22.0, aiReadiness: 28 },
+  'CIV': { population: 26,   gdp: 70,    climate: 27, internet: 43, mobileRatio:18.0, aiReadiness: 32 },
+  'NER': { population: 25,   gdp: 15,    climate: 29, internet: 14, mobileRatio:35.0, aiReadiness: 12 },
+  'AUS': { population: 26,   gdp: 1675,  climate: 22, internet: 96, mobileRatio: 1.5, aiReadiness: 85 },
+  'ROU': { population: 19,   gdp: 301,   climate: 10, internet: 87, mobileRatio: 2.6, aiReadiness: 58 },
+  'NLD': { population: 18,   gdp: 1013,  climate: 11, internet: 97, mobileRatio: 1.4, aiReadiness: 88 },
+  'BEL': { population: 11,   gdp: 593,   climate: 11, internet: 92, mobileRatio: 1.5, aiReadiness: 82 },
+  'CHE': { population: 9,    gdp: 807,   climate: 9,  internet: 97, mobileRatio: 1.4, aiReadiness: 87 },
+  'SWE': { population: 10,   gdp: 585,   climate: 6,  internet: 97, mobileRatio: 1.5, aiReadiness: 88 },
+  'NOR': { population: 5,    gdp: 579,   climate: 4,  internet: 99, mobileRatio: 1.4, aiReadiness: 88 },
+  'ITA': { population: 60,   gdp: 2011,  climate: 15, internet: 88, mobileRatio: 2.0, aiReadiness: 78 },
+  'ARE': { population: 10,   gdp: 507,   climate: 28, internet: 99, mobileRatio: 1.8, aiReadiness: 82 },
+  'ISR': { population: 9,    gdp: 522,   climate: 21, internet: 90, mobileRatio: 1.6, aiReadiness: 84 },
+  'SGP': { population: 6,    gdp: 397,   climate: 28, internet: 97, mobileRatio: 1.4, aiReadiness: 90 },
+  'NZL': { population: 5,    gdp: 245,   climate: 14, internet: 96, mobileRatio: 1.5, aiReadiness: 82 },
+  'CHL': { population: 19,   gdp: 301,   climate: 12, internet: 88, mobileRatio: 3.0, aiReadiness: 60 },
+  'PRT': { population: 10,   gdp: 254,   climate: 17, internet: 88, mobileRatio: 2.0, aiReadiness: 72 },
+  'GRC': { population: 11,   gdp: 219,   climate: 18, internet: 84, mobileRatio: 2.5, aiReadiness: 66 },
+  'CZE': { population: 11,   gdp: 290,   climate: 9,  internet: 91, mobileRatio: 2.2, aiReadiness: 70 },
+  'HUN': { population: 10,   gdp: 179,   climate: 11, internet: 91, mobileRatio: 2.4, aiReadiness: 65 },
+  'AUT': { population: 9,    gdp: 471,   climate: 9,  internet: 93, mobileRatio: 1.6, aiReadiness: 80 },
+  'DNK': { population: 6,    gdp: 395,   climate: 9,  internet: 99, mobileRatio: 1.3, aiReadiness: 90 },
+  'FIN': { population: 6,    gdp: 283,   climate: 4,  internet: 97, mobileRatio: 1.4, aiReadiness: 88 },
+  'TWN': { population: 23,   gdp: 790,   climate: 24, internet: 92, mobileRatio: 1.8, aiReadiness: 78 },
+  'LKA': { population: 22,   gdp: 83,    climate: 28, internet: 44, mobileRatio:10.0, aiReadiness: 38 },
+  'SYR': { population: 21,   gdp: 23,    climate: 18, internet: 42, mobileRatio:15.0, aiReadiness: 20 },
+  'KAZ': { population: 19,   gdp: 225,   climate: 8,  internet: 88, mobileRatio: 4.0, aiReadiness: 55 },
+  'MLI': { population: 22,   gdp: 19,    climate: 29, internet: 24, mobileRatio:28.0, aiReadiness: 16 },
+  'BFA': { population: 22,   gdp: 19,    climate: 29, internet: 22, mobileRatio:30.0, aiReadiness: 14 },
+  'MWI': { population: 20,   gdp: 13,    climate: 23, internet: 18, mobileRatio:32.0, aiReadiness: 12 },
+  'ZMB': { population: 19,   gdp: 28,    climate: 20, internet: 26, mobileRatio:26.0, aiReadiness: 20 },
+  'ZWE': { population: 16,   gdp: 26,    climate: 21, internet: 34, mobileRatio:22.0, aiReadiness: 24 },
+  'ECU': { population: 18,   gdp: 115,   climate: 22, internet: 67, mobileRatio: 7.0, aiReadiness: 42 },
+  'GTM': { population: 17,   gdp: 85,    climate: 24, internet: 55, mobileRatio:12.0, aiReadiness: 38 },
+  'SOM': { population: 17,   gdp: 9,     climate: 28, internet: 12, mobileRatio:35.0, aiReadiness:  8 },
+  'CUB': { population: 11,   gdp: 107,   climate: 26, internet: 62, mobileRatio: 8.0, aiReadiness: 32 },
+  'BOL': { population: 12,   gdp: 44,    climate: 18, internet: 48, mobileRatio:12.0, aiReadiness: 36 },
+  'HTI': { population: 12,   gdp: 20,    climate: 28, internet: 33, mobileRatio:28.0, aiReadiness: 14 },
+  'BLR': { population: 10,   gdp: 73,    climate: 8,  internet: 89, mobileRatio: 2.8, aiReadiness: 50 },
+  'PRY': { population: 7,    gdp: 40,    climate: 24, internet: 66, mobileRatio: 7.0, aiReadiness: 44 },
+  'HND': { population: 10,   gdp: 31,    climate: 25, internet: 43, mobileRatio:16.0, aiReadiness: 34 },
+  'SVN': { population: 2,    gdp: 62,    climate: 11, internet: 90, mobileRatio: 2.0, aiReadiness: 75 },
+  'LBY': { population: 7,    gdp: 46,    climate: 20, internet: 62, mobileRatio: 8.0, aiReadiness: 26 },
+  'TUN': { population: 12,   gdp: 46,    climate: 19, internet: 74, mobileRatio: 4.8, aiReadiness: 48 },
+  'SEN': { population: 17,   gdp: 28,    climate: 28, internet: 53, mobileRatio:18.0, aiReadiness: 35 },
+  'TCD': { population: 17,   gdp: 12,    climate: 27, internet: 11, mobileRatio:40.0, aiReadiness:  8 },
+  'GIN': { population: 13,   gdp: 16,    climate: 27, internet: 23, mobileRatio:28.0, aiReadiness: 16 },
+  'RWA': { population: 14,   gdp: 11,    climate: 21, internet: 30, mobileRatio:20.0, aiReadiness: 34 },
+  'BEN': { population: 13,   gdp: 17,    climate: 28, internet: 26, mobileRatio:24.0, aiReadiness: 22 },
+  'TJK': { population: 10,   gdp: 10,    climate: 11, internet: 34, mobileRatio:14.0, aiReadiness: 26 },
+  'AZE': { population: 10,   gdp: 78,    climate: 15, internet: 84, mobileRatio: 3.5, aiReadiness: 52 },
+  'HRV': { population: 4,    gdp: 71,    climate: 13, internet: 90, mobileRatio: 2.2, aiReadiness: 68 },
+  'BGR': { population: 7,    gdp: 87,    climate: 12, internet: 84, mobileRatio: 2.8, aiReadiness: 60 },
+  'SRB': { population: 7,    gdp: 63,    climate: 12, internet: 83, mobileRatio: 3.0, aiReadiness: 60 },
+  'SVK': { population: 6,    gdp: 118,   climate: 10, internet: 90, mobileRatio: 2.2, aiReadiness: 68 },
+  'LTU': { population: 3,    gdp: 70,    climate: 8,  internet: 90, mobileRatio: 1.8, aiReadiness: 72 },
+  'LVA': { population: 2,    gdp: 42,    climate: 7,  internet: 91, mobileRatio: 1.8, aiReadiness: 70 },
+  'EST': { population: 1,    gdp: 38,    climate: 7,  internet: 94, mobileRatio: 1.6, aiReadiness: 82 },
+  'QAT': { population: 3,    gdp: 236,   climate: 29, internet: 99, mobileRatio: 1.8, aiReadiness: 74 },
+  'KWT': { population: 4,    gdp: 184,   climate: 28, internet: 99, mobileRatio: 1.9, aiReadiness: 72 },
+  'OMN': { population: 5,    gdp: 104,   climate: 28, internet: 90, mobileRatio: 2.5, aiReadiness: 62 },
+  'BHR': { population: 2,    gdp: 44,    climate: 28, internet: 99, mobileRatio: 1.9, aiReadiness: 74 },
+  'JOR': { population: 10,   gdp: 46,    climate: 18, internet: 85, mobileRatio: 4.0, aiReadiness: 58 },
+  'LBN': { population: 5,    gdp: 23,    climate: 20, internet: 84, mobileRatio: 5.0, aiReadiness: 48 },
+  'HKG': { population: 7,    gdp: 369,   climate: 24, internet: 95, mobileRatio: 1.4, aiReadiness: 82 },
+  'MNG': { population: 3,    gdp: 17,    climate: 1,  internet: 76, mobileRatio: 8.0, aiReadiness: 42 },
+  'PNG': { population: 10,   gdp: 30,    climate: 26, internet: 15, mobileRatio:30.0, aiReadiness: 12 },
+  'FJI': { population: 1,    gdp: 4,     climate: 26, internet: 59, mobileRatio:12.0, aiReadiness: 38 },
 };
 
 // ── State ─────────────────────────────────────────────────────────────────
@@ -532,10 +715,15 @@ const isoToId   = {};   // ISO3 → MapLibre feature id (integer)
 const isoToName = {};   // ISO3 → country name
 const isoToBounds = {}; // ISO3 → [[minLng,minLat],[maxLng,maxLat]]
 const dataCache = {};   // overlay key → {data, min, max, unit, source, ...}
-let activeOverlay = 'population';
-let selectedIso   = null;
-let hoveredId     = null;
-let topChart      = null;
+let activeOverlay  = 'population';
+let selectedIso    = null;
+let hoveredId      = null;
+let topChart       = null;
+let currentYear    = 2022;
+let compareMode    = false;
+let compareIsos    = [];
+let tlPlaying      = false;
+let tlInterval     = null;
 
 // ── Map ───────────────────────────────────────────────────────────────────
 const map = new maplibregl.Map({
@@ -643,10 +831,22 @@ function onLeave() {
 function onCountryClick(e) {
   const f    = e.features[0];
   const iso3 = f.properties[ISO3_KEY];
+  if (!iso3) return;
+
+  if (compareMode) {
+    if (!compareIsos.includes(iso3)) {
+      if (compareIsos.length < 2) compareIsos.push(iso3);
+      else { compareIsos[1] = iso3; }
+    }
+    updateCompareBadge();
+    if (compareIsos.length === 2) renderCompareDrawer();
+    return;
+  }
+
   if (selectedIso && isoToId[selectedIso] !== undefined)
     map.setFeatureState({source:'countries', id: isoToId[selectedIso]}, {selected: false});
-  selectedIso = iso3 || null;
-  if (iso3 && isoToId[iso3] !== undefined)
+  selectedIso = iso3;
+  if (isoToId[iso3] !== undefined)
     map.setFeatureState({source:'countries', id: isoToId[iso3]}, {selected: true});
   showCountryPanel(iso3);
 }
@@ -671,6 +871,39 @@ function switchTab(tab) {
   activateOverlay(TABS[tab].overlays[0]);
 }
 
+// ── Year multiplier ────────────────────────────────────────────────────────
+const YEAR_ANCHORS = {
+  population:     [[2000,.84],[2005,.88],[2010,.92],[2015,.96],[2020,.99],[2022,1],[2024,1.02]],
+  gdp:            [[2000,.28],[2005,.40],[2008,.58],[2009,.52],[2010,.60],[2015,.76],[2019,.93],[2020,.87],[2022,1],[2024,1.07]],
+  climate:        [[2000,.970],[2010,.985],[2022,1],[2024,1.006]],
+  internet:       [[2000,.09],[2005,.17],[2010,.35],[2015,.62],[2020,.90],[2022,1],[2024,1.05]],
+  mobileRatio:    [[2000,.25],[2005,.45],[2010,.70],[2015,.88],[2022,1],[2024,1.02]],
+  aiReadiness:    [[2000,.04],[2005,.08],[2010,.16],[2015,.36],[2020,.78],[2022,1],[2024,1.12]],
+  temperature:    [[2000,.82],[2010,.90],[2022,1],[2024,1.05]],
+  co2:            [[2000,.80],[2010,.92],[2022,1],[2024,1.02]],
+  renewable:      [[2000,.58],[2010,.72],[2022,1],[2024,1.09]],
+  vaccination:    [[2000,.78],[2010,.87],[2022,1],[2024,1.02]],
+  life_expectancy:[[2000,.94],[2010,.97],[2022,1],[2024,1.01]],
+  healthcare:     [[2000,.40],[2010,.62],[2022,1],[2024,1.06]],
+  poverty:        [[2000,1.65],[2010,1.30],[2015,1.15],[2022,1],[2024,.93]],
+  conflicts:      [[2000,.85],[2010,.90],[2022,1],[2024,1.0]],
+  refugees:       [[2000,.35],[2010,.55],[2022,1],[2024,1.12]],
+};
+
+function yearMultiplier(key, year) {
+  const pts = YEAR_ANCHORS[key];
+  if (!pts || year === 2022) return 1;
+  if (year <= pts[0][0]) return pts[0][1];
+  if (year >= pts[pts.length-1][0]) return pts[pts.length-1][1];
+  for (let i = 0; i < pts.length-1; i++) {
+    if (year >= pts[i][0] && year <= pts[i+1][0]) {
+      const t = (year - pts[i][0]) / (pts[i+1][0] - pts[i][0]);
+      return pts[i][1] + t * (pts[i+1][1] - pts[i][1]);
+    }
+  }
+  return 1;
+}
+
 // ── Overlay activation ────────────────────────────────────────────────────
 async function activateOverlay(key) {
   activeOverlay = key;
@@ -680,10 +913,11 @@ async function activateOverlay(key) {
     b.classList.toggle('active', b.dataset.overlay === key));
 
   // Gather data
+  const mult = yearMultiplier(key, currentYear);
   let data = {};
   if (m.prop) {
     Object.entries(COUNTRY_DATA).forEach(([iso3, d]) => {
-      if (d[m.prop] !== undefined) data[iso3] = d[m.prop];
+      if (d[m.prop] !== undefined) data[iso3] = d[m.prop] * mult;
     });
   } else {
     if (!dataCache[key]) {
@@ -704,7 +938,10 @@ async function activateOverlay(key) {
         return;
       }
     }
-    data = dataCache[key].data;
+    const raw = dataCache[key].data;
+    Object.entries(raw).forEach(([iso3, v]) => {
+      if (v !== null && !isNaN(+v)) data[iso3] = +v * mult;
+    });
   }
 
   // Stats
@@ -744,7 +981,7 @@ async function activateOverlay(key) {
 // ── Legend ────────────────────────────────────────────────────────────────
 function updateLegend(m, minVal, maxVal, low, high) {
   document.getElementById('legendWrap').style.display = '';
-  document.getElementById('legendLabel').textContent = `${m.label} · ${m.unit}`;
+  document.getElementById('legendLabel').textContent = `${m.label} · ${m.unit} · ${currentYear}`;
   document.getElementById('legendBar').style.background = `linear-gradient(90deg,${low},${high})`;
   document.getElementById('legendMin').textContent = m.format(minVal);
   document.getElementById('legendMid').textContent = m.format((minVal + maxVal) / 2);
@@ -787,6 +1024,9 @@ function showPending(m) {
 // ── Country panel ─────────────────────────────────────────────────────────
 function showCountryPanel(iso3) {
   if (!iso3) return;
+  document.getElementById('aiResult').innerHTML = '';
+  document.getElementById('aiGenBtn').disabled = false;
+  document.getElementById('aiGenBtn').innerHTML = '✨ Generate Insight';
   const m    = OVERLAY_META[activeOverlay];
   const name = isoToName[iso3] || iso3;
   const c    = dataCache[activeOverlay];
@@ -944,6 +1184,162 @@ document.getElementById('cpClose').addEventListener('click', () => {
   if (selectedIso && isoToId[selectedIso] !== undefined)
     map.setFeatureState({source:'countries', id: isoToId[selectedIso]}, {selected: false});
   selectedIso = null;
+});
+
+// ── ISO3 → flag emoji ─────────────────────────────────────────────────────
+const ISO3_TO_ISO2 = {
+  AFG:'AF',AGO:'AO',ARG:'AR',AUS:'AU',AUT:'AT',AZE:'AZ',BEL:'BE',BEN:'BJ',BFA:'BF',
+  BGD:'BD',BHR:'BH',BLR:'BY',BOL:'BO',BRA:'BR',BGR:'BG',CAN:'CA',CHE:'CH',CHL:'CL',
+  CHN:'CN',CIV:'CI',CMR:'CM',COD:'CD',COL:'CO',CUB:'CU',CZE:'CZ',DEU:'DE',DZA:'DZ',
+  DNK:'DK',ECU:'EC',EGY:'EG',ESP:'ES',EST:'EE',ETH:'ET',FIN:'FI',FJI:'FJ',FRA:'FR',
+  GBR:'GB',GHA:'GH',GIN:'GN',GRC:'GR',GTM:'GT',HKG:'HK',HND:'HN',HRV:'HR',HTI:'HT',
+  HUN:'HU',IDN:'ID',IND:'IN',IRN:'IR',IRQ:'IQ',ISR:'IL',ITA:'IT',JOR:'JO',JPN:'JP',
+  KAZ:'KZ',KEN:'KE',KOR:'KR',KWT:'KW',LBN:'LB',LBY:'LY',LKA:'LK',LTU:'LT',LVA:'LV',
+  MAR:'MA',MDG:'MG',MEX:'MX',MLI:'ML',MMR:'MM',MNG:'MN',MOZ:'MZ',MWI:'MW',MYS:'MY',
+  NER:'NE',NGA:'NG',NLD:'NL',NOR:'NO',NZL:'NZ',OMN:'OM',PAK:'PK',PER:'PE',PHL:'PH',
+  PNG:'PG',POL:'PL',PRT:'PT',PRY:'PY',QAT:'QA',ROU:'RO',RUS:'RU',RWA:'RW',SAU:'SA',
+  SDN:'SD',SEN:'SN',SGP:'SG',SOM:'SO',SRB:'RS',SVK:'SK',SVN:'SI',SWE:'SE',SYR:'SY',
+  TCD:'TD',THA:'TH',TJK:'TJ',TUN:'TN',TUR:'TR',TWN:'TW',TZA:'TZ',UGA:'UG',UKR:'UA',
+  ARE:'AE',USA:'US',VEN:'VE',VNM:'VN',ZAF:'ZA',ZMB:'ZM',ZWE:'ZW',
+};
+
+function isoToFlag(iso3) {
+  const iso2 = ISO3_TO_ISO2[iso3];
+  if (!iso2) return '🏳️';
+  return iso2.replace(/./g, c => String.fromCodePoint(0x1F1E6 + c.charCodeAt(0) - 65));
+}
+
+// ── Timeline slider ───────────────────────────────────────────────────────
+document.getElementById('tlSlider').addEventListener('input', function () {
+  currentYear = parseInt(this.value);
+  document.getElementById('tlYear').textContent = currentYear;
+  activateOverlay(activeOverlay);
+});
+
+document.getElementById('tlPlay').addEventListener('click', function () {
+  if (tlPlaying) {
+    clearInterval(tlInterval);
+    tlPlaying = false;
+    this.textContent = '▶';
+    this.classList.remove('playing');
+  } else {
+    const slider = document.getElementById('tlSlider');
+    if (parseInt(slider.value) >= 2024) slider.value = 2000;
+    tlPlaying = true;
+    this.textContent = '⏸';
+    this.classList.add('playing');
+    tlInterval = setInterval(() => {
+      const s = document.getElementById('tlSlider');
+      let y = parseInt(s.value);
+      if (y >= 2024) {
+        clearInterval(tlInterval);
+        tlPlaying = false;
+        document.getElementById('tlPlay').textContent = '▶';
+        document.getElementById('tlPlay').classList.remove('playing');
+        return;
+      }
+      y++;
+      s.value = y;
+      currentYear = y;
+      document.getElementById('tlYear').textContent = y;
+      activateOverlay(activeOverlay);
+    }, 1000);
+  }
+});
+
+// ── Compare mode ──────────────────────────────────────────────────────────
+const COMPARE_METRICS = [
+  { key: 'population', label: 'Population', fmt: v => Math.round(v)+'M'  },
+  { key: 'gdp',        label: 'GDP',        fmt: v => v >= 1000 ? '$'+(v/1000).toFixed(1)+'T' : '$'+Math.round(v)+'B' },
+  { key: 'climate',    label: 'Avg Temp',   fmt: v => Math.round(v)+'°C' },
+  { key: 'internet',   label: 'Internet',   fmt: v => Math.round(v)+'%'  },
+  { key: 'aiReadiness',label: 'AI Readiness',fmt: v => Math.round(v)+'/100' },
+  { key: 'mobileRatio',label: 'Mobile Ratio',fmt: v => v.toFixed(1)+'×'  },
+];
+
+document.getElementById('compare-btn').addEventListener('click', function () {
+  compareMode = !compareMode;
+  this.classList.toggle('active', compareMode);
+  if (!compareMode) {
+    compareIsos = [];
+    updateCompareBadge();
+    document.getElementById('compare-drawer').classList.remove('open');
+  }
+  map.getCanvas().style.cursor = compareMode ? 'crosshair' : '';
+});
+
+document.getElementById('compareClose').addEventListener('click', () => {
+  compareIsos = [];
+  document.getElementById('compare-drawer').classList.remove('open');
+  document.getElementById('compare-btn').classList.remove('active');
+  compareMode = false;
+  updateCompareBadge();
+  map.getCanvas().style.cursor = '';
+});
+
+function updateCompareBadge() {
+  const cnt = document.getElementById('compareCount');
+  if (compareIsos.length > 0) {
+    cnt.style.display = 'inline-flex';
+    cnt.textContent = compareIsos.length;
+  } else {
+    cnt.style.display = 'none';
+  }
+}
+
+function renderCompareDrawer() {
+  const [a, b] = compareIsos;
+  document.getElementById('compare-card-a').innerHTML = buildCompareCard(a, b);
+  document.getElementById('compare-card-b').innerHTML = buildCompareCard(b, a);
+  document.getElementById('compare-drawer').classList.add('open');
+}
+
+function buildCompareCard(iso3, otherIso3) {
+  const d  = COUNTRY_DATA[iso3]  || {};
+  const d2 = COUNTRY_DATA[otherIso3] || {};
+  const name = isoToName[iso3] || iso3;
+  let html = `<div class="compare-card-head">
+    <span class="compare-flag">${isoToFlag(iso3)}</span>
+    <div><div class="compare-name">${name}</div><div class="compare-iso">${iso3}</div></div>
+  </div>`;
+  COMPARE_METRICS.forEach(m => {
+    const v  = d[m.key];
+    const v2 = d2[m.key];
+    if (v === undefined) return;
+    const max   = Math.max(+v, +(v2 ?? v));
+    const pct   = max > 0 ? Math.min((+v / max) * 100, 100) : 0;
+    const isWin = v2 !== undefined && +v >= +v2;
+    html += `<div class="compare-row">
+      <span class="compare-row-label">${m.label}</span>
+      <div class="compare-bar-wrap">
+        <div class="compare-bar-bg">
+          <div class="compare-bar${isWin ? ' win' : ''}" style="width:${pct.toFixed(1)}%"></div>
+        </div>
+        <span class="compare-bar-val">${m.fmt(+v)}</span>
+      </div>
+    </div>`;
+  });
+  return html;
+}
+
+// ── AI Insight ───────────────────────────────────────────��────────────────
+document.getElementById('aiGenBtn').addEventListener('click', async function () {
+  if (!selectedIso) return;
+  this.disabled = true;
+  this.innerHTML = '<span class="ai-spinner"></span> Thinking…';
+  const result = document.getElementById('aiResult');
+  result.innerHTML = '';
+  try {
+    const res = await fetch(`/api/insight?country=${encodeURIComponent(selectedIso)}`);
+    const json = await res.json();
+    if (json.error) throw new Error(json.error);
+    result.innerHTML = `<div class="ai-insight-card">${json.insight.replace(/\n/g,'<br>')}</div>`;
+  } catch (err) {
+    result.innerHTML = `<div class="ai-error">⚠️ ${err.message}</div>`;
+  } finally {
+    this.disabled = false;
+    this.innerHTML = '✨ Generate Insight';
+  }
 });
 
 // ── Tab nav ───────────────────────────────────────────────────────────────
