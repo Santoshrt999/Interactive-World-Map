@@ -100,6 +100,7 @@ Interactive-World-Map/
 - [ ] Story mode (guided data narratives)
 - [ ] Ocean health dashboard
 - [ ] Education & gender inequality overlays
+- [ ] **Wire up AI Insight with live Anthropic API key** — feature is fully built, just needs `ANTHROPIC_API_KEY` funded via [console.anthropic.com](https://console.anthropic.com) (~$5 to start, ~$0.002/insight)
 
 ---
 
