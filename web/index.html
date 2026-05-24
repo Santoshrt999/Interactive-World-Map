@@ -639,7 +639,7 @@ map.on('style.load', async () => {
 
 // ── GeoJSON ───────────────────────────────────────────────────────────────
 async function loadGeoJSON() {
-  const resp    = await fetch('data/countries.geojson');
+  const resp    = await fetch('data/countries.geojson?v=2');
   const geojson = await resp.json();
 
   geojson.features.forEach((f, i) => {
