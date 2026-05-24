@@ -645,7 +645,7 @@ async function loadGeoJSON() {
   geojson.features.forEach((f, i) => {
     const iso3 = f.properties[ISO3_KEY];
     const name = f.properties.name || '';
-    if (!iso3) return;
+    if (!iso3 || iso3 === '-99') return;
     isoToId[iso3]   = i;
     isoToName[iso3] = name;
     const pts = flatCoords(f.geometry);
