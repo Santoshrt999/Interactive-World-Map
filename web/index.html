@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Visual Geography Intelligence</title>
   <link href="https://unpkg.com/maplibre-gl@4.7.1/dist/maplibre-gl.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet" />
   <style>
     :root {
       --bg:           #02040e;
@@ -359,7 +361,11 @@
     /* ── Splash Screen ────────────────────────────────────────────────────── */
     #splash {
       position: fixed; inset: 0; z-index: 9999;
-      background: #0a0f1a;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(96,165,250,.15), transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(52,211,153,.12), transparent 60%),
+        radial-gradient(ellipse at 60% 80%, rgba(251,191,36,.08), transparent 60%),
+        #0a0f1a;
       display: flex; align-items: center; justify-content: center;
       transition: opacity .8s ease;
       overflow: hidden;
@@ -380,8 +386,8 @@
     .splash-card {
       position: relative; z-index: 1;
       width: min(520px, 92vw);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
       background: rgba(255,255,255,.04);
       border: 1px solid rgba(255,255,255,.08);
       border-radius: 20px;
@@ -392,7 +398,14 @@
 
     .splash-globe {
       font-size: 60px; display: inline-block;
-      animation: globeFloat 4s ease-in-out infinite;
+      animation: globeEntrance .8s cubic-bezier(.16,1,.3,1) both,
+                 globeFloat 4s 1.2s ease-in-out infinite;
+    }
+    @keyframes globeEntrance {
+      0%  { opacity: 0; transform: scale(.3) rotate(-10deg); }
+      60% { transform: scale(1.15) rotate(4deg); }
+      80% { transform: scale(.94) rotate(-2deg); }
+      100%{ opacity: 1; transform: scale(1) rotate(0deg); }
     }
     @keyframes globeFloat {
       0%,100% { transform: translateY(0);    filter: drop-shadow(0 0 18px rgba(96,165,250,.55)); }
@@ -400,17 +413,18 @@
     }
 
     .splash-title {
+      font-family: 'Space Grotesk', system-ui, sans-serif;
       font-size: 2.8rem; font-weight: 700; line-height: 1.1; margin: 0;
       background: linear-gradient(135deg, #60a5fa 0%, #34d399 100%);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text;
-      animation: fadeInUp .6s ease both;
     }
 
     .splash-tagline {
-      font-size: 1rem; color: rgba(255,255,255,.65); line-height: 1.65;
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: 1rem; font-weight: 400;
+      color: rgba(255,255,255,.6); line-height: 1.65;
       max-width: 400px; margin: 0;
-      animation: fadeInUp .6s .3s ease both;
     }
 
     .splash-pills {
@@ -418,6 +432,7 @@
       width: 100%;
     }
     .splash-pill {
+      font-family: 'Inter', system-ui, sans-serif;
       display: inline-flex; align-items: center; gap: 5px;
       padding: 5px 13px; border-radius: 100px; cursor: default;
       background: rgba(255,255,255,.05);
@@ -425,49 +440,52 @@
       border-right: 1px solid rgba(255,255,255,.08);
       border-bottom: 1px solid rgba(255,255,255,.08);
       border-left: 3px solid var(--pc,#60a5fa);
-      font-size: .78rem; color: rgba(255,255,255,.82);
-      opacity: 0; animation: pillPop .4s ease forwards;
+      font-size: .85rem; color: rgba(255,255,255,.82);
+      opacity: 0;
       transition: transform .18s, box-shadow .18s;
     }
-    .splash-pill:hover { transform: scale(1.05); box-shadow: 0 0 12px var(--pc,#60a5fa); }
-    @keyframes pillPop { to { opacity: 1; } }
+    .splash-pill.visible { opacity: 1; }
+    .splash-pill:hover   { transform: scale(1.05); box-shadow: 0 0 12px var(--pc,#60a5fa); }
 
     .splash-stats {
       display: flex; align-items: stretch; width: 100%;
       background: rgba(255,255,255,.04); border: 1px solid rgba(255,255,255,.07);
       border-radius: 14px; overflow: hidden;
-      animation: fadeInUp .5s 1.5s ease both;
     }
     .splash-stat {
       flex: 1; padding: 14px 10px;
       display: flex; flex-direction: column; align-items: center; gap: 4px;
     }
     .splash-stat-num {
-      font-size: 1.65rem; font-weight: 800; line-height: 1;
+      font-family: 'Space Grotesk', system-ui, sans-serif;
+      font-size: 1.65rem; font-weight: 600; line-height: 1;
       background: linear-gradient(135deg,#60a5fa,#34d399);
       -webkit-background-clip: text; -webkit-text-fill-color: transparent;
       background-clip: text; font-variant-numeric: tabular-nums;
     }
-    .splash-stat-label { font-size: .7rem; color: rgba(255,255,255,.45); }
-    .splash-stat-sep   { width: 1px; background: rgba(255,255,255,.07); flex-shrink: 0; }
+    .splash-stat-label {
+      font-family: 'Inter', system-ui, sans-serif;
+      font-size: .7rem; color: rgba(255,255,255,.45);
+    }
+    .splash-stat-sep { width: 1px; background: rgba(255,255,255,.07); flex-shrink: 0; }
 
     .splash-author {
       font-size: .8rem; color: rgba(255,255,255,.38);
       font-style: italic; margin: -4px 0;
-      animation: fadeInUp .4s 1.7s ease both;
     }
 
     #splashExploreBtn {
+      font-family: 'Space Grotesk', system-ui, sans-serif;
       padding: 14px 40px; border-radius: 50px;
-      background: linear-gradient(135deg,#3b82f6,#34d399);
+      background: linear-gradient(135deg, #60a5fa, #34d399);
       border: none; color: #fff;
       font-size: 1rem; font-weight: 600; cursor: pointer;
-      transition: transform .2s, filter .2s;
-      animation: fadeInUp .4s 1.9s ease both;
+      transition: all .2s ease;
       display: inline-flex; align-items: center; gap: 8px;
-      box-shadow: 0 8px 32px rgba(59,130,246,.35);
+      box-shadow: 0 8px 32px rgba(96,165,250,.35);
     }
-    #splashExploreBtn:hover { transform: scale(1.04); filter: brightness(1.15); }
+    #splashExploreBtn:hover  { transform: scale(1.04); filter: brightness(1.15); }
+    #splashExploreBtn:active { transform: scale(.97); }
     .splash-btn-spin {
       width: 16px; height: 16px; border-radius: 50%;
       border: 2px solid rgba(255,255,255,.35); border-top-color: #fff;
@@ -479,9 +497,11 @@
       font-size: .75rem; color: rgba(255,255,255,.28); cursor: pointer;
       background: none; border: none; padding: 0;
       transition: color .15s;
-      animation: fadeInUp .4s 2.1s ease both;
     }
     #splashSkip:hover { color: rgba(255,255,255,.58); }
+
+    /* Animate.css — ensure fill-mode applies inside card */
+    #splash .animate__animated { animation-fill-mode: both; }
 
     /* ── Map copyright footer ─────────────────────────────────────────────── */
     #map-footer {
@@ -509,30 +529,33 @@
 
     <div class="splash-globe">🌍</div>
 
-    <h1 class="splash-title">Interactive World Map</h1>
+    <h1 class="splash-title animate__animated animate__fadeInUp"
+        style="--animate-duration:.6s;--animate-delay:.2s">Interactive World Map</h1>
 
-    <p class="splash-tagline">Explore our planet through data — population, climate,
+    <p class="splash-tagline animate__animated animate__fadeInUp"
+       style="--animate-duration:.6s;--animate-delay:.4s">Explore our planet through data — population, climate,
       conflict, food security, natural resources &amp; more.</p>
 
     <div class="splash-pills">
-      <span class="splash-pill" style="--pc:#60a5fa;animation-delay:.80s">🌍 Explorer</span>
-      <span class="splash-pill" style="--pc:#34d399;animation-delay:.88s">🌡️ Climate</span>
-      <span class="splash-pill" style="--pc:#f87171;animation-delay:.96s">❤️ Health</span>
-      <span class="splash-pill" style="--pc:#fbbf24;animation-delay:1.04s">🤝 Aid</span>
-      <span class="splash-pill" style="--pc:#a78bfa;animation-delay:1.12s">💻 Technology</span>
-      <span class="splash-pill" style="--pc:#fb923c;animation-delay:1.20s">⚔️ Conflict</span>
-      <span class="splash-pill" style="--pc:#4ade80;animation-delay:1.28s">🌾 Food &amp; Water</span>
-      <span class="splash-pill" style="--pc:#e879f9;animation-delay:1.36s">⛏️ Resources</span>
+      <span class="splash-pill" style="--pc:#60a5fa">🌍 Explorer</span>
+      <span class="splash-pill" style="--pc:#34d399">🌡️ Climate</span>
+      <span class="splash-pill" style="--pc:#f87171">❤️ Health</span>
+      <span class="splash-pill" style="--pc:#fbbf24">🤝 Aid</span>
+      <span class="splash-pill" style="--pc:#a78bfa">💻 Technology</span>
+      <span class="splash-pill" style="--pc:#f97316">⚔️ Conflict</span>
+      <span class="splash-pill" style="--pc:#4ade80">🌾 Food &amp; Water</span>
+      <span class="splash-pill" style="--pc:#e5e7eb">⛏️ Resources</span>
     </div>
 
-    <div class="splash-stats">
+    <div class="splash-stats animate__animated animate__fadeInUp"
+         style="--animate-duration:.5s;--animate-delay:.8s">
       <div class="splash-stat">
-        <span class="splash-stat-num" id="statCountries">0</span>
+        <span class="splash-stat-num" id="splashStatCountries">0</span>
         <span class="splash-stat-label">🌐 Countries</span>
       </div>
       <div class="splash-stat-sep"></div>
       <div class="splash-stat">
-        <span class="splash-stat-num" id="statLayers">0</span>
+        <span class="splash-stat-num" id="splashStatLayers">0</span>
         <span class="splash-stat-label">📊 Data Layers</span>
       </div>
       <div class="splash-stat-sep"></div>
@@ -542,14 +565,19 @@
       </div>
     </div>
 
-    <div class="splash-author">Built by Santosh Goteti</div>
+    <div class="splash-author animate__animated animate__fadeInUp"
+         style="--animate-duration:.4s;--animate-delay:.9s">Built by Santosh Goteti</div>
 
-    <button id="splashExploreBtn">
+    <button id="splashExploreBtn"
+            class="animate__animated animate__fadeInUp"
+            style="--animate-duration:.4s;--animate-delay:1s">
       <span class="splash-btn-spin"></span>
       <span>🚀 Start Exploring</span>
     </button>
 
-    <button id="splashSkip">Skip intro ›</button>
+    <button id="splashSkip"
+            class="animate__animated animate__fadeInUp"
+            style="--animate-duration:.4s;--animate-delay:1.1s">Skip intro ›</button>
 
   </div>
 </div>
@@ -1452,7 +1480,16 @@ document.getElementById('tabNav').addEventListener('click', e => {
     starsEl.appendChild(s);
   }
 
-  // Count-up animation
+  // Pills — staggered Animate.css fadeIn (80 ms apart, starting at 600 ms)
+  document.querySelectorAll('.splash-pill').forEach((pill, i) => {
+    setTimeout(() => {
+      pill.style.setProperty('--animate-duration', '0.45s');
+      pill.classList.add('animate__animated', 'animate__fadeIn');
+      pill.classList.add('visible');
+    }, 600 + i * 80);
+  });
+
+  // Count-up animation (ease-out cubic, 1.2 s)
   function countUp(el, target, delay) {
     setTimeout(() => {
       const dur = 1200, t0 = performance.now();
@@ -1465,8 +1502,8 @@ document.getElementById('tabNav').addEventListener('click', e => {
       requestAnimationFrame(tick);
     }, delay);
   }
-  countUp(document.getElementById('statCountries'), 258, 700);
-  countUp(document.getElementById('statLayers'),   15,  850);
+  countUp(document.getElementById('splashStatCountries'), 258, 900);
+  countUp(document.getElementById('splashStatLayers'),   15, 1050);
 
   // Dismiss splash
   function dismiss(instant) {
