@@ -28,6 +28,10 @@ Output
         conflicts.json     Battle deaths per 100k (World Bank / UCDP, CC BY 4.0)
 
 All data comes from official, openly licensed sources. See docs/DATA_SOURCES.md.
+    web/data/
+      country_data.json  GDP, population, internet penetration (World Bank, CC BY 4.0)
+
+All data comes from official, openly licensed sources. See docs/DATA_SOURCES.md.
 """
 
 import os
@@ -35,6 +39,12 @@ import sys
 import time
 
 sys.path.insert(0, os.path.dirname(__file__))
+
+
+def run_country():
+    from fetch_country_data import fetch
+    print('\nCountry core metrics (GDP, population, internet):')
+    fetch()
 
 
 def run_climate():
@@ -62,6 +72,7 @@ def run_humanitarian():
 
 
 RUNNERS = {
+    'country':      run_country,
     'climate':      run_climate,
     'health':       run_health,
     'humanitarian': run_humanitarian,
@@ -90,4 +101,4 @@ if __name__ == '__main__':
         print(f'Completed with {len(errors)} error(s). Check output above.')
         sys.exit(1)
     else:
-        print('All datasets written to web/data/dashboards/.')
+        print('All datasets updated successfully.')

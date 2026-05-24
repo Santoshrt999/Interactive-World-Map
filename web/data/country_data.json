@@ -1,0 +1,1320 @@
+{
+  "CHN": {
+    "population": 1409.0,
+    "gdp": 18743.8,
+    "climate": 14,
+    "internet": 91.6,
+    "mobileRatio": 2.8,
+    "aiReadiness": 62
+  },
+  "IND": {
+    "population": 1450.9,
+    "gdp": 3909.9,
+    "climate": 25,
+    "internet": 70.0,
+    "mobileRatio": 8.5,
+    "aiReadiness": 49
+  },
+  "USA": {
+    "population": 340.1,
+    "gdp": 28751.0,
+    "climate": 12,
+    "internet": 94.7,
+    "mobileRatio": 1.4,
+    "aiReadiness": 90
+  },
+  "IDN": {
+    "population": 283.5,
+    "gdp": 1396.3,
+    "climate": 27,
+    "internet": 72.8,
+    "mobileRatio": 12.0,
+    "aiReadiness": 44
+  },
+  "PAK": {
+    "population": 251.3,
+    "gdp": 371.6,
+    "climate": 22,
+    "internet": 57.3,
+    "mobileRatio": 18.0,
+    "aiReadiness": 33
+  },
+  "BRA": {
+    "population": 212.0,
+    "gdp": 2185.8,
+    "climate": 25,
+    "internet": 84.5,
+    "mobileRatio": 3.5,
+    "aiReadiness": 55
+  },
+  "NGA": {
+    "population": 232.7,
+    "gdp": 252.3,
+    "climate": 28,
+    "internet": 41.2,
+    "mobileRatio": 22.0,
+    "aiReadiness": 30
+  },
+  "BGD": {
+    "population": 173.6,
+    "gdp": 450.1,
+    "climate": 26,
+    "internet": 53.4,
+    "mobileRatio": 15.0,
+    "aiReadiness": 34
+  },
+  "RUS": {
+    "population": 143.5,
+    "gdp": 2173.8,
+    "climate": 0,
+    "internet": 94.4,
+    "mobileRatio": 2.2,
+    "aiReadiness": 58
+  },
+  "ETH": {
+    "population": 132.1,
+    "gdp": 149.7,
+    "climate": 22,
+    "internet": 21.9,
+    "mobileRatio": 25.0,
+    "aiReadiness": 25
+  },
+  "MEX": {
+    "population": 130.9,
+    "gdp": 1856.4,
+    "climate": 21,
+    "internet": 83.1,
+    "mobileRatio": 4.2,
+    "aiReadiness": 52
+  },
+  "JPN": {
+    "population": 124.0,
+    "gdp": 4027.6,
+    "climate": 16,
+    "internet": 85.5,
+    "mobileRatio": 1.8,
+    "aiReadiness": 78
+  },
+  "PHL": {
+    "population": 115.8,
+    "gdp": 461.6,
+    "climate": 27,
+    "internet": 67.3,
+    "mobileRatio": 10.0,
+    "aiReadiness": 43
+  },
+  "EGY": {
+    "population": 116.5,
+    "gdp": 389.1,
+    "climate": 22,
+    "internet": 74.6,
+    "mobileRatio": 5.5,
+    "aiReadiness": 45
+  },
+  "COD": {
+    "population": 109.3,
+    "gdp": 71.0,
+    "climate": 24,
+    "internet": 19.7,
+    "mobileRatio": 30.0,
+    "aiReadiness": 16
+  },
+  "VNM": {
+    "population": 101.0,
+    "gdp": 476.4,
+    "climate": 27,
+    "internet": 84.2,
+    "mobileRatio": 6.0,
+    "aiReadiness": 45
+  },
+  "IRN": {
+    "population": 91.6,
+    "gdp": 475.3,
+    "climate": 18,
+    "internet": 85.3,
+    "mobileRatio": 3.8,
+    "aiReadiness": 40
+  },
+  "TUR": {
+    "population": 85.5,
+    "gdp": 1359.1,
+    "climate": 14,
+    "internet": 89.8,
+    "mobileRatio": 3.2,
+    "aiReadiness": 54
+  },
+  "DEU": {
+    "population": 83.5,
+    "gdp": 4685.6,
+    "climate": 10,
+    "internet": 93.5,
+    "mobileRatio": 1.6,
+    "aiReadiness": 82
+  },
+  "THA": {
+    "population": 71.7,
+    "gdp": 526.5,
+    "climate": 28,
+    "internet": 90.9,
+    "mobileRatio": 4.5,
+    "aiReadiness": 55
+  },
+  "GBR": {
+    "population": 69.2,
+    "gdp": 3686.0,
+    "climate": 11,
+    "internet": 95.5,
+    "mobileRatio": 1.5,
+    "aiReadiness": 86
+  },
+  "TZA": {
+    "population": 68.6,
+    "gdp": 78.8,
+    "climate": 23,
+    "internet": 31.2,
+    "mobileRatio": 28.0,
+    "aiReadiness": 22
+  },
+  "FRA": {
+    "population": 68.6,
+    "gdp": 3160.4,
+    "climate": 13,
+    "internet": 88.7,
+    "mobileRatio": 1.7,
+    "aiReadiness": 85
+  },
+  "ZAF": {
+    "population": 64.0,
+    "gdp": 401.1,
+    "climate": 17,
+    "internet": 78.4,
+    "mobileRatio": 6.8,
+    "aiReadiness": 52
+  },
+  "MMR": {
+    "population": 54.5,
+    "gdp": 74.1,
+    "climate": 27,
+    "internet": 38,
+    "mobileRatio": 20.0,
+    "aiReadiness": 28
+  },
+  "KEN": {
+    "population": 56.4,
+    "gdp": 120.3,
+    "climate": 22,
+    "internet": 35.0,
+    "mobileRatio": 18.0,
+    "aiReadiness": 38
+  },
+  "KOR": {
+    "population": 51.8,
+    "gdp": 1875.4,
+    "climate": 13,
+    "internet": 97.9,
+    "mobileRatio": 1.6,
+    "aiReadiness": 82
+  },
+  "COL": {
+    "population": 52.9,
+    "gdp": 418.8,
+    "climate": 24,
+    "internet": 79.3,
+    "mobileRatio": 5.2,
+    "aiReadiness": 47
+  },
+  "ESP": {
+    "population": 48.8,
+    "gdp": 1725.7,
+    "climate": 16,
+    "internet": 95.8,
+    "mobileRatio": 1.8,
+    "aiReadiness": 78
+  },
+  "UGA": {
+    "population": 50.0,
+    "gdp": 53.9,
+    "climate": 23,
+    "internet": 8.9,
+    "mobileRatio": 26.0,
+    "aiReadiness": 24
+  },
+  "ARG": {
+    "population": 45.7,
+    "gdp": 638.4,
+    "climate": 16,
+    "internet": 89.7,
+    "mobileRatio": 3.8,
+    "aiReadiness": 52
+  },
+  "DZA": {
+    "population": 46.8,
+    "gdp": 269.3,
+    "climate": 12,
+    "internet": 77.4,
+    "mobileRatio": 7.0,
+    "aiReadiness": 38
+  },
+  "SDN": {
+    "population": 50.4,
+    "gdp": 49.7,
+    "climate": 25,
+    "internet": 31,
+    "mobileRatio": 22.0,
+    "aiReadiness": 20
+  },
+  "IRQ": {
+    "population": 46.0,
+    "gdp": 279.6,
+    "climate": 23,
+    "internet": 81.5,
+    "mobileRatio": 8.0,
+    "aiReadiness": 28
+  },
+  "UKR": {
+    "population": 37.9,
+    "gdp": 190.7,
+    "climate": 9,
+    "internet": 82.5,
+    "mobileRatio": 3.5,
+    "aiReadiness": 44
+  },
+  "CAN": {
+    "population": 41.3,
+    "gdp": 2243.6,
+    "climate": 0,
+    "internet": 94.4,
+    "mobileRatio": 1.6,
+    "aiReadiness": 87
+  },
+  "MAR": {
+    "population": 38.1,
+    "gdp": 160.6,
+    "climate": 18,
+    "internet": 91.2,
+    "mobileRatio": 6.5,
+    "aiReadiness": 46
+  },
+  "SAU": {
+    "population": 35.3,
+    "gdp": 1239.8,
+    "climate": 26,
+    "internet": 100.0,
+    "mobileRatio": 2.2,
+    "aiReadiness": 70
+  },
+  "POL": {
+    "population": 36.6,
+    "gdp": 917.8,
+    "climate": 9,
+    "internet": 88.6,
+    "mobileRatio": 2.4,
+    "aiReadiness": 65
+  },
+  "MYS": {
+    "population": 35.6,
+    "gdp": 422.2,
+    "climate": 27,
+    "internet": 98.0,
+    "mobileRatio": 3.2,
+    "aiReadiness": 68
+  },
+  "MOZ": {
+    "population": 34.6,
+    "gdp": 22.7,
+    "climate": 23,
+    "internet": 20.5,
+    "mobileRatio": 32.0,
+    "aiReadiness": 15
+  },
+  "GHA": {
+    "population": 34.4,
+    "gdp": 82.3,
+    "climate": 27,
+    "internet": 72.2,
+    "mobileRatio": 14.0,
+    "aiReadiness": 36
+  },
+  "PER": {
+    "population": 34.2,
+    "gdp": 289.2,
+    "climate": 19,
+    "internet": 82.0,
+    "mobileRatio": 6.0,
+    "aiReadiness": 48
+  },
+  "AGO": {
+    "population": 37.9,
+    "gdp": 101.0,
+    "climate": 22,
+    "internet": 40.7,
+    "mobileRatio": 20.0,
+    "aiReadiness": 25
+  },
+  "AFG": {
+    "population": 42.6,
+    "gdp": 17.2,
+    "climate": 12,
+    "internet": 16.1,
+    "mobileRatio": 28.0,
+    "aiReadiness": 10
+  },
+  "VEN": {
+    "population": 28.4,
+    "gdp": 119.8,
+    "climate": 28,
+    "internet": 76.7,
+    "mobileRatio": 5.5,
+    "aiReadiness": 30
+  },
+  "MDG": {
+    "population": 32.0,
+    "gdp": 17.4,
+    "climate": 22,
+    "internet": 18.7,
+    "mobileRatio": 30.0,
+    "aiReadiness": 14
+  },
+  "CMR": {
+    "population": 29.1,
+    "gdp": 53.3,
+    "climate": 25,
+    "internet": 46.3,
+    "mobileRatio": 22.0,
+    "aiReadiness": 28
+  },
+  "CIV": {
+    "population": 31.9,
+    "gdp": 87.1,
+    "climate": 27,
+    "internet": 41.4,
+    "mobileRatio": 18.0,
+    "aiReadiness": 32
+  },
+  "NER": {
+    "population": 27.0,
+    "gdp": 19.9,
+    "climate": 29,
+    "internet": 15.6,
+    "mobileRatio": 35.0,
+    "aiReadiness": 12
+  },
+  "AUS": {
+    "population": 27.2,
+    "gdp": 1757.0,
+    "climate": 22,
+    "internet": 96.1,
+    "mobileRatio": 1.5,
+    "aiReadiness": 85
+  },
+  "ROU": {
+    "population": 19.1,
+    "gdp": 382.6,
+    "climate": 10,
+    "internet": 91.3,
+    "mobileRatio": 2.6,
+    "aiReadiness": 58
+  },
+  "NLD": {
+    "population": 18.0,
+    "gdp": 1214.9,
+    "climate": 11,
+    "internet": 97.0,
+    "mobileRatio": 1.4,
+    "aiReadiness": 88
+  },
+  "BEL": {
+    "population": 11.9,
+    "gdp": 671.4,
+    "climate": 11,
+    "internet": 95.8,
+    "mobileRatio": 1.5,
+    "aiReadiness": 82
+  },
+  "CHE": {
+    "population": 9.0,
+    "gdp": 936.6,
+    "climate": 9,
+    "internet": 97.3,
+    "mobileRatio": 1.4,
+    "aiReadiness": 87
+  },
+  "SWE": {
+    "population": 10.6,
+    "gdp": 603.7,
+    "climate": 6,
+    "internet": 95.8,
+    "mobileRatio": 1.5,
+    "aiReadiness": 88
+  },
+  "NOR": {
+    "population": 5.6,
+    "gdp": 483.6,
+    "climate": 4,
+    "internet": 99.0,
+    "mobileRatio": 1.4,
+    "aiReadiness": 88
+  },
+  "ITA": {
+    "population": 59.0,
+    "gdp": 2380.8,
+    "climate": 15,
+    "internet": 89.2,
+    "mobileRatio": 2.0,
+    "aiReadiness": 78
+  },
+  "ARE": {
+    "population": 11.0,
+    "gdp": 552.3,
+    "climate": 28,
+    "internet": 100.0,
+    "mobileRatio": 1.8,
+    "aiReadiness": 82
+  },
+  "ISR": {
+    "population": 10.0,
+    "gdp": 540.4,
+    "climate": 21,
+    "internet": 88.2,
+    "mobileRatio": 1.6,
+    "aiReadiness": 84
+  },
+  "SGP": {
+    "population": 6.0,
+    "gdp": 547.4,
+    "climate": 28,
+    "internet": 94.4,
+    "mobileRatio": 1.4,
+    "aiReadiness": 90
+  },
+  "NZL": {
+    "population": 5.3,
+    "gdp": 260.2,
+    "climate": 14,
+    "internet": 93.5,
+    "mobileRatio": 1.5,
+    "aiReadiness": 82
+  },
+  "CHL": {
+    "population": 19.8,
+    "gdp": 330.3,
+    "climate": 12,
+    "internet": 95.6,
+    "mobileRatio": 3.0,
+    "aiReadiness": 60
+  },
+  "PRT": {
+    "population": 10.7,
+    "gdp": 313.3,
+    "climate": 17,
+    "internet": 88.5,
+    "mobileRatio": 2.0,
+    "aiReadiness": 72
+  },
+  "GRC": {
+    "population": 10.4,
+    "gdp": 256.2,
+    "climate": 18,
+    "internet": 86.3,
+    "mobileRatio": 2.5,
+    "aiReadiness": 66
+  },
+  "CZE": {
+    "population": 10.9,
+    "gdp": 347.0,
+    "climate": 9,
+    "internet": 87.7,
+    "mobileRatio": 2.2,
+    "aiReadiness": 70
+  },
+  "HUN": {
+    "population": 9.6,
+    "gdp": 222.7,
+    "climate": 11,
+    "internet": 93.8,
+    "mobileRatio": 2.4,
+    "aiReadiness": 65
+  },
+  "AUT": {
+    "population": 9.2,
+    "gdp": 534.8,
+    "climate": 9,
+    "internet": 91.9,
+    "mobileRatio": 1.6,
+    "aiReadiness": 80
+  },
+  "DNK": {
+    "population": 6.0,
+    "gdp": 424.5,
+    "climate": 9,
+    "internet": 99.8,
+    "mobileRatio": 1.3,
+    "aiReadiness": 90
+  },
+  "FIN": {
+    "population": 5.6,
+    "gdp": 298.7,
+    "climate": 4,
+    "internet": 93.7,
+    "mobileRatio": 1.4,
+    "aiReadiness": 88
+  },
+  "TWN": {
+    "population": 23,
+    "gdp": 807,
+    "climate": 24,
+    "internet": 92,
+    "mobileRatio": 1.8,
+    "aiReadiness": 78
+  },
+  "LKA": {
+    "population": 21.9,
+    "gdp": 99.0,
+    "climate": 28,
+    "internet": 54.6,
+    "mobileRatio": 10.0,
+    "aiReadiness": 38
+  },
+  "SYR": {
+    "population": 24.7,
+    "gdp": 25,
+    "climate": 18,
+    "internet": 42,
+    "mobileRatio": 15.0,
+    "aiReadiness": 20
+  },
+  "KAZ": {
+    "population": 20.6,
+    "gdp": 291.5,
+    "climate": 8,
+    "internet": 93.4,
+    "mobileRatio": 4.0,
+    "aiReadiness": 55
+  },
+  "MLI": {
+    "population": 24.5,
+    "gdp": 26.8,
+    "climate": 29,
+    "internet": 36.8,
+    "mobileRatio": 28.0,
+    "aiReadiness": 16
+  },
+  "BFA": {
+    "population": 23.5,
+    "gdp": 23.1,
+    "climate": 29,
+    "internet": 28.3,
+    "mobileRatio": 30.0,
+    "aiReadiness": 14
+  },
+  "MWI": {
+    "population": 21.7,
+    "gdp": 11.3,
+    "climate": 23,
+    "internet": 19.0,
+    "mobileRatio": 32.0,
+    "aiReadiness": 12
+  },
+  "ZMB": {
+    "population": 21.3,
+    "gdp": 25.3,
+    "climate": 20,
+    "internet": 17.1,
+    "mobileRatio": 26.0,
+    "aiReadiness": 20
+  },
+  "ZWE": {
+    "population": 16.6,
+    "gdp": 41.5,
+    "climate": 21,
+    "internet": 41.6,
+    "mobileRatio": 22.0,
+    "aiReadiness": 24
+  },
+  "ECU": {
+    "population": 18.1,
+    "gdp": 124.7,
+    "climate": 22,
+    "internet": 77.2,
+    "mobileRatio": 7.0,
+    "aiReadiness": 42
+  },
+  "GTM": {
+    "population": 18.4,
+    "gdp": 113.2,
+    "climate": 24,
+    "internet": 60.2,
+    "mobileRatio": 12.0,
+    "aiReadiness": 38
+  },
+  "SOM": {
+    "population": 19.0,
+    "gdp": 12.0,
+    "climate": 28,
+    "internet": 27.9,
+    "mobileRatio": 35.0,
+    "aiReadiness": 8
+  },
+  "CUB": {
+    "population": 11.0,
+    "gdp": 107,
+    "climate": 26,
+    "internet": 70.5,
+    "mobileRatio": 8.0,
+    "aiReadiness": 32
+  },
+  "BOL": {
+    "population": 12.4,
+    "gdp": 54.9,
+    "climate": 18,
+    "internet": 79.7,
+    "mobileRatio": 12.0,
+    "aiReadiness": 36
+  },
+  "HTI": {
+    "population": 11.8,
+    "gdp": 25.2,
+    "climate": 28,
+    "internet": 47.9,
+    "mobileRatio": 28.0,
+    "aiReadiness": 14
+  },
+  "BLR": {
+    "population": 9.1,
+    "gdp": 76.0,
+    "climate": 8,
+    "internet": 94.3,
+    "mobileRatio": 2.8,
+    "aiReadiness": 50
+  },
+  "PRY": {
+    "population": 6.9,
+    "gdp": 44.5,
+    "climate": 24,
+    "internet": 81.6,
+    "mobileRatio": 7.0,
+    "aiReadiness": 44
+  },
+  "HND": {
+    "population": 10.8,
+    "gdp": 37.1,
+    "climate": 25,
+    "internet": 58.6,
+    "mobileRatio": 16.0,
+    "aiReadiness": 34
+  },
+  "SVN": {
+    "population": 2.1,
+    "gdp": 73.0,
+    "climate": 11,
+    "internet": 90.8,
+    "mobileRatio": 2.0,
+    "aiReadiness": 75
+  },
+  "LBY": {
+    "population": 7.4,
+    "gdp": 48.5,
+    "climate": 20,
+    "internet": 82.0,
+    "mobileRatio": 8.0,
+    "aiReadiness": 26
+  },
+  "TUN": {
+    "population": 12.3,
+    "gdp": 51.3,
+    "climate": 19,
+    "internet": 76.5,
+    "mobileRatio": 4.8,
+    "aiReadiness": 48
+  },
+  "SEN": {
+    "population": 18.5,
+    "gdp": 32.8,
+    "climate": 28,
+    "internet": 60.1,
+    "mobileRatio": 18.0,
+    "aiReadiness": 35
+  },
+  "TCD": {
+    "population": 20.3,
+    "gdp": 19.5,
+    "climate": 27,
+    "internet": 12.6,
+    "mobileRatio": 40.0,
+    "aiReadiness": 8
+  },
+  "GIN": {
+    "population": 14.8,
+    "gdp": 25.0,
+    "climate": 27,
+    "internet": 33.3,
+    "mobileRatio": 28.0,
+    "aiReadiness": 16
+  },
+  "RWA": {
+    "population": 14.3,
+    "gdp": 14.3,
+    "climate": 21,
+    "internet": 31.7,
+    "mobileRatio": 20.0,
+    "aiReadiness": 34
+  },
+  "BEN": {
+    "population": 14.5,
+    "gdp": 21.5,
+    "climate": 28,
+    "internet": 34.0,
+    "mobileRatio": 24.0,
+    "aiReadiness": 22
+  },
+  "TJK": {
+    "population": 10.6,
+    "gdp": 14.2,
+    "climate": 11,
+    "internet": 55.8,
+    "mobileRatio": 14.0,
+    "aiReadiness": 26
+  },
+  "AZE": {
+    "population": 10.2,
+    "gdp": 74.3,
+    "climate": 15,
+    "internet": 90.8,
+    "mobileRatio": 3.5,
+    "aiReadiness": 52
+  },
+  "HRV": {
+    "population": 3.9,
+    "gdp": 93.0,
+    "climate": 13,
+    "internet": 83.6,
+    "mobileRatio": 2.2,
+    "aiReadiness": 68
+  },
+  "BGR": {
+    "population": 6.4,
+    "gdp": 113.3,
+    "climate": 12,
+    "internet": 82.4,
+    "mobileRatio": 2.8,
+    "aiReadiness": 60
+  },
+  "SRB": {
+    "population": 6.6,
+    "gdp": 90.1,
+    "climate": 12,
+    "internet": 87.7,
+    "mobileRatio": 3.0,
+    "aiReadiness": 60
+  },
+  "SVK": {
+    "population": 5.4,
+    "gdp": 140.9,
+    "climate": 10,
+    "internet": 89.8,
+    "mobileRatio": 2.2,
+    "aiReadiness": 68
+  },
+  "LTU": {
+    "population": 2.9,
+    "gdp": 84.9,
+    "climate": 8,
+    "internet": 89.2,
+    "mobileRatio": 1.8,
+    "aiReadiness": 72
+  },
+  "LVA": {
+    "population": 1.9,
+    "gdp": 43.7,
+    "climate": 7,
+    "internet": 92.7,
+    "mobileRatio": 1.8,
+    "aiReadiness": 70
+  },
+  "EST": {
+    "population": 1.4,
+    "gdp": 43.1,
+    "climate": 7,
+    "internet": 92.2,
+    "mobileRatio": 1.6,
+    "aiReadiness": 82
+  },
+  "QAT": {
+    "population": 2.9,
+    "gdp": 219.2,
+    "climate": 29,
+    "internet": 98.1,
+    "mobileRatio": 1.8,
+    "aiReadiness": 74
+  },
+  "KWT": {
+    "population": 4.9,
+    "gdp": 160.2,
+    "climate": 28,
+    "internet": 100.0,
+    "mobileRatio": 1.9,
+    "aiReadiness": 72
+  },
+  "OMN": {
+    "population": 5.3,
+    "gdp": 107.1,
+    "climate": 28,
+    "internet": 95.3,
+    "mobileRatio": 2.5,
+    "aiReadiness": 62
+  },
+  "BHR": {
+    "population": 1.6,
+    "gdp": 47.1,
+    "climate": 28,
+    "internet": 100.0,
+    "mobileRatio": 1.9,
+    "aiReadiness": 74
+  },
+  "JOR": {
+    "population": 11.6,
+    "gdp": 53.4,
+    "climate": 18,
+    "internet": 95.6,
+    "mobileRatio": 4.0,
+    "aiReadiness": 58
+  },
+  "LBN": {
+    "population": 5.8,
+    "gdp": 20.1,
+    "climate": 20,
+    "internet": 80.6,
+    "mobileRatio": 5.0,
+    "aiReadiness": 48
+  },
+  "HKG": {
+    "population": 7.5,
+    "gdp": 406.9,
+    "climate": 24,
+    "internet": 95.8,
+    "mobileRatio": 1.4,
+    "aiReadiness": 82
+  },
+  "MNG": {
+    "population": 3.5,
+    "gdp": 23.8,
+    "climate": 1,
+    "internet": 85.1,
+    "mobileRatio": 8.0,
+    "aiReadiness": 42
+  },
+  "PNG": {
+    "population": 10.6,
+    "gdp": 31.8,
+    "climate": 26,
+    "internet": 18.8,
+    "mobileRatio": 30.0,
+    "aiReadiness": 12
+  },
+  "FJI": {
+    "population": 0.9,
+    "gdp": 6.0,
+    "climate": 26,
+    "internet": 74.7,
+    "mobileRatio": 12.0,
+    "aiReadiness": 38
+  },
+  "MAC": {
+    "gdp": 49.5,
+    "population": 0.7,
+    "internet": 89.8
+  },
+  "MLT": {
+    "gdp": 25.0,
+    "population": 0.6,
+    "internet": 93.9
+  },
+  "TTO": {
+    "gdp": 25.6,
+    "population": 1.4,
+    "internet": 82.2
+  },
+  "SLE": {
+    "gdp": 7.0,
+    "population": 8.6,
+    "internet": 25.1
+  },
+  "NIC": {
+    "gdp": 19.7,
+    "population": 6.9,
+    "internet": 61.4
+  },
+  "LCA": {
+    "gdp": 2.5,
+    "population": 0.2,
+    "internet": 68.2
+  },
+  "TON": {
+    "gdp": 0.6,
+    "population": 0.1,
+    "internet": 67.4
+  },
+  "GNB": {
+    "gdp": 2.2,
+    "population": 2.2,
+    "internet": 29.8
+  },
+  "DMA": {
+    "gdp": 0.7,
+    "population": 0.1,
+    "internet": 82.0
+  },
+  "BDI": {
+    "gdp": 3.1,
+    "population": 14.0,
+    "internet": 8.6
+  },
+  "TKM": {
+    "gdp": 51.4,
+    "population": 7.5
+  },
+  "WSM": {
+    "gdp": 1.2,
+    "population": 0.2
+  },
+  "TUV": {
+    "gdp": 0.1,
+    "population": 0.0
+  },
+  "SLV": {
+    "gdp": 35.4,
+    "population": 6.3,
+    "internet": 66.5
+  },
+  "NPL": {
+    "gdp": 42.9,
+    "population": 29.7,
+    "internet": 46.3
+  },
+  "COG": {
+    "gdp": 15.7,
+    "population": 6.3,
+    "internet": 47.3
+  },
+  "ATG": {
+    "gdp": 2.2,
+    "population": 0.1,
+    "internet": 72.7
+  },
+  "URY": {
+    "gdp": 81.0,
+    "population": 3.4,
+    "internet": 92.0
+  },
+  "DOM": {
+    "gdp": 124.3,
+    "population": 11.4,
+    "internet": 91.0
+  },
+  "LAO": {
+    "gdp": 16.5,
+    "population": 7.8,
+    "internet": 65.6
+  },
+  "VCT": {
+    "gdp": 1.2,
+    "population": 0.1,
+    "internet": 76.2
+  },
+  "CRI": {
+    "gdp": 95.4,
+    "population": 5.1,
+    "internet": 87.2
+  },
+  "PRK": {
+    "population": 26.5
+  },
+  "BRB": {
+    "gdp": 7.5,
+    "population": 0.3,
+    "internet": 70.4
+  },
+  "BRN": {
+    "gdp": 15.3,
+    "population": 0.5,
+    "internet": 96.3
+  },
+  "SSD": {
+    "population": 11.9
+  },
+  "IRL": {
+    "gdp": 609.2,
+    "population": 5.4,
+    "internet": 97.2
+  },
+  "YEM": {
+    "population": 40.6
+  },
+  "KIR": {
+    "gdp": 0.3,
+    "population": 0.1,
+    "internet": 89.4
+  },
+  "UZB": {
+    "gdp": 115.0,
+    "population": 36.4,
+    "internet": 89.5
+  },
+  "SYC": {
+    "gdp": 2.2,
+    "population": 0.1,
+    "internet": 87.8
+  },
+  "GNQ": {
+    "gdp": 12.8,
+    "population": 1.9,
+    "internet": 63.3
+  },
+  "LUX": {
+    "gdp": 93.3,
+    "population": 0.7,
+    "internet": 99.1
+  },
+  "KGZ": {
+    "gdp": 17.5,
+    "population": 7.2,
+    "internet": 92.0
+  },
+  "BTN": {
+    "gdp": 3.0,
+    "population": 0.8,
+    "internet": 91.3
+  },
+  "MDV": {
+    "gdp": 7.1,
+    "population": 0.5,
+    "internet": 85.2
+  },
+  "FSM": {
+    "gdp": 0.5,
+    "population": 0.1,
+    "internet": 39.5
+  },
+  "CPV": {
+    "gdp": 2.7,
+    "population": 0.5,
+    "internet": 74.7
+  },
+  "ERI": {
+    "population": 3.5
+  },
+  "SLB": {
+    "gdp": 1.6,
+    "population": 0.8,
+    "internet": 29.0
+  },
+  "BIH": {
+    "gdp": 29.6,
+    "population": 3.2,
+    "internet": 86.1
+  },
+  "AND": {
+    "gdp": 4.0,
+    "population": 0.1,
+    "internet": 94.4
+  },
+  "ALB": {
+    "gdp": 27.0,
+    "population": 2.4,
+    "internet": 85.9
+  },
+  "ARM": {
+    "gdp": 26.0,
+    "population": 3.0,
+    "internet": 81.3
+  },
+  "ISL": {
+    "gdp": 33.3,
+    "population": 0.4,
+    "internet": 98.2
+  },
+  "GMB": {
+    "gdp": 2.4,
+    "population": 2.8,
+    "internet": 49.5
+  },
+  "NAM": {
+    "gdp": 13.4,
+    "population": 3.0,
+    "internet": 64.9
+  },
+  "PAN": {
+    "gdp": 86.5,
+    "population": 4.5,
+    "internet": 72.8
+  },
+  "MNE": {
+    "gdp": 8.3,
+    "population": 0.6,
+    "internet": 88.9
+  },
+  "SUR": {
+    "gdp": 4.4,
+    "population": 0.6,
+    "internet": 87.4
+  },
+  "TLS": {
+    "gdp": 1.9,
+    "population": 1.4
+  },
+  "GEO": {
+    "gdp": 34.2,
+    "population": 3.7,
+    "internet": 83.8
+  },
+  "NRU": {
+    "gdp": 0.2,
+    "population": 0.0,
+    "internet": 83.0
+  },
+  "BLZ": {
+    "gdp": 3.2,
+    "population": 0.4,
+    "internet": 80.0
+  },
+  "MDA": {
+    "gdp": 18.2,
+    "population": 2.4,
+    "internet": 77.4
+  },
+  "CAF": {
+    "gdp": 2.8,
+    "population": 5.3,
+    "internet": 13.8
+  },
+  "LSO": {
+    "gdp": 2.3,
+    "population": 2.3,
+    "internet": 51.8
+  },
+  "LBR": {
+    "gdp": 4.8,
+    "population": 5.6,
+    "internet": 32.2
+  },
+  "LIE": {
+    "gdp": 8.2,
+    "population": 0.0,
+    "internet": 98.3
+  },
+  "PSE": {
+    "gdp": 13.7,
+    "population": 5.3,
+    "internet": 86.6
+  },
+  "GRD": {
+    "gdp": 1.4,
+    "population": 0.1,
+    "internet": 70.2
+  },
+  "MHL": {
+    "gdp": 0.3,
+    "population": 0.0,
+    "internet": 65.9
+  },
+  "XKX": {
+    "gdp": 11.2,
+    "population": 1.6
+  },
+  "MRT": {
+    "gdp": 10.9,
+    "population": 5.2,
+    "internet": 45.8
+  },
+  "DJI": {
+    "gdp": 4.2,
+    "population": 1.2,
+    "internet": 65.3
+  },
+  "PLW": {
+    "gdp": 0.3,
+    "population": 0.0,
+    "internet": 83.9
+  },
+  "MCO": {
+    "gdp": 11.1,
+    "population": 0.0,
+    "internet": 99.0
+  },
+  "GUY": {
+    "gdp": 24.7,
+    "population": 0.8,
+    "internet": 83.0
+  },
+  "JAM": {
+    "gdp": 22.0,
+    "population": 2.8,
+    "internet": 90.1
+  },
+  "VUT": {
+    "gdp": 1.1,
+    "population": 0.3
+  },
+  "SMR": {
+    "gdp": 2.0,
+    "population": 0.0,
+    "internet": 97.4
+  },
+  "MUS": {
+    "gdp": 14.9,
+    "population": 1.2,
+    "internet": 73.3
+  },
+  "STP": {
+    "gdp": 0.8,
+    "population": 0.2,
+    "internet": 59.1
+  },
+  "GAB": {
+    "gdp": 20.9,
+    "population": 2.5,
+    "internet": 68.7
+  },
+  "BWA": {
+    "gdp": 19.4,
+    "population": 2.5,
+    "internet": 57.5
+  },
+  "CYP": {
+    "gdp": 37.6,
+    "population": 1.4,
+    "internet": 89.6
+  },
+  "COM": {
+    "gdp": 1.4,
+    "population": 0.9,
+    "internet": 32.5
+  },
+  "TGO": {
+    "gdp": 10.7,
+    "population": 9.5,
+    "internet": 39.5
+  },
+  "BHS": {
+    "gdp": 15.8,
+    "population": 0.4,
+    "internet": 92.5
+  },
+  "KNA": {
+    "gdp": 1.1,
+    "population": 0.0,
+    "internet": 76.9
+  },
+  "SWZ": {
+    "gdp": 4.9,
+    "population": 1.2,
+    "internet": 63.4
+  },
+  "KHM": {
+    "gdp": 46.4,
+    "population": 17.6,
+    "internet": 68.5
+  },
+  "_updated": "2026-05-24",
+  "_source": "World Bank Open Data (CC BY 4.0)"
+}
