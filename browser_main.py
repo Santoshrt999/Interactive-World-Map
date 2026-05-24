@@ -163,7 +163,11 @@ class Handler(http.server.SimpleHTTPRequestHandler):
         except ImportError:
             self._json(503, {'error': 'Run: pip install anthropic'})
         except Exception as e:
-            self._json(500, {'error': str(e)})
+            msg = str(e)
+            if 'api_key' in msg.lower() or 'authentication' in msg.lower() or 'auth_token' in msg.lower():
+                self._json(401, {'error': 'Set the ANTHROPIC_API_KEY environment variable to use AI Insight.'})
+            else:
+                self._json(500, {'error': msg})
 
     def _json(self, code, data):
         body = json.dumps(data).encode()
